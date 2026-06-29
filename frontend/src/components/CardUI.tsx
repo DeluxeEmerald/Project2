@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 function CardUI()
 {
+
     let _ud : any = localStorage.getItem('user_data');
     let ud = JSON.parse( _ud );
     let userId : string = ud.id;
@@ -11,10 +12,7 @@ function CardUI()
     const [cardList,setCardList] = useState('');
     const [search,setSearchValue] = React.useState('');
     const [card,setCardNameValue] = React.useState('');
-    
-    const [message,setMessage] = useState('');
-    const [searchResults,setResults] = useState('');
-    const [cardList,setCardList] = useState('');
+
 
     async function addCard(e:any) : Promise<void>
     {
@@ -91,6 +89,7 @@ function CardUI()
     {
         setCardNameValue( e.target.value );
     }
+
     
     return(
     <div id="cardUIDiv">

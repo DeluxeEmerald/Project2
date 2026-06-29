@@ -39,7 +39,7 @@ function Login()
         {
             alert(error.toString());
             return;
-        }
+        }         
     };
 
     function handleSetLoginName( e: any ) : void

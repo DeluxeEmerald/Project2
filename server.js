@@ -5,10 +5,10 @@ const app = express();
 
 const MongoClient = require('mongodb').MongoClient;
 //Change to our URL
-const url = '';
+const url = 'mongodb+srv://yabdielt_db_user:tOvPIgoTX4o83Y6B@cluster0.cztkvro.mongodb.net/?appName=Cluster0';
 
 const client = new MongoClient(url);
-client.connect();
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -104,4 +104,6 @@ app.post('/api/searchcards', async (req, res, next) =>
     res.status(200).json(ret);
 });
 
+client.connect();
 app.listen(5000); // start Node + Express server on port 5000
+
