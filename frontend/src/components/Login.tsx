@@ -53,10 +53,15 @@ function Login()
     }
 
     return(
-        <div id="loginDiv">
-        <span id="inner-title">PLEASE LOG IN</span><br />
-        Login: <input type="text" id="loginName" placeholder="Username" onChange={handleSetLoginName} />
+        <div id="loginDiv" className='flex flex-col items-center bg-white rounded-full p-8 max-w-m mx-auto h-100 gap-4'>
+        <span id="inner-title" className="font-bold underline">PLEASE LOG IN</span><br />
+        <div className='bg-red-50 flex items-center gap-2'>
+        Login: <input type="text" id="loginName" placeholder="Username" onChange={handleSetLoginName}
+        className=''/>
+        </div>
+        <div className='bg-red-50 flex items-center gap-2'>
         Password: <input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} />
+        </div>
         <input type="submit" id="loginButton" className="buttons" value = "Do It"
             onClick={doLogin} />
         <span id="loginResult">{message}</span>

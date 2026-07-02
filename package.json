@@ -10,10 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/vite": "^4.3.2",
     "body-parser": "^1.20.5",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^4.22.2",
-    "mongodb": "^7.4.0"
+    "mongodb": "^7.4.0",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^4.3.2"
   }
 }
