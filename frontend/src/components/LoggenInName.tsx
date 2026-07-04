@@ -8,9 +8,10 @@ function LoggedInName()
     };
 
     return(
-    <div id="loggedInDiv">
-        <span id="userName">Logged In As John Doe </span><br />
-        <button type="button" id="logoutButton" className="buttons"
+    <div id="loggedInDiv" className='flex'>
+        <h1 className='ml-2'>Magic Collectors</h1>
+        <span id="userName" className='ml-96'>Logged In As John Doe </span><br />
+        <button type="button" id="logoutButton" className="bg-accent1 rounded-full w-24 ml-10"
             onClick={doLogout}> Log Out </button>
     </div>
     );
