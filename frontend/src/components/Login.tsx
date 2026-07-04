@@ -52,6 +52,10 @@ function Login()
         setPassword( e.target.value );
     }
 
+    function toSignUp(){
+        window.location.href = '/signup';
+    }
+
     return(
         <div id="loginDiv" className='mt-40 flex flex-col items-center bg-main rounded-2xl p-8 max-w-m h-full gap-4'>
         <span id="inner-title" className="font-bold underline text-accent2">PLEASE LOG IN</span><br />
@@ -62,9 +66,10 @@ function Login()
         <div className='flex items-center gap-2 text-accent1'>
         Password*: <input type="password" id="loginPassword" placeholder="Password" className='bg-white' onChange={handleSetPassword} />
         </div>
-        <input type="submit" id="loginButton" className="bg-accent1 shadow-lg shadow-accent1/50 rounded-lg w-80 hover:bg-accent2" value = "Do It"
+        <input type="submit" id="loginButton" className="bg-accent1 shadow-lg shadow-accent1/50 rounded-lg w-80 hover:bg-accent2 cursor-pointer" value = "Do It"
             onClick={doLogin} />
         <span id="loginResult" className="text-accent2">{message}</span>
+        <span className='text-black'>Don't have an account? <button className='text-blue-800 underline hover:cursor-pointer' onClick={x=>toSignUp()}>Sign Up</button></span>
         </div>
     );
 };
