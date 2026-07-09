@@ -10,7 +10,7 @@ function Login()
     {
         event.preventDefault();
         
-        var obj = {name:loginName,password:loginPassword};
+        var obj = {login:loginName,password:loginPassword};
         var js = JSON.stringify(obj);
         
         try
@@ -52,6 +52,10 @@ function Login()
         setPassword( e.target.value );
     }
 
+    function toSignUp(){
+        window.location.href = '/signup';
+    }
+
     return(
         <div id="loginDiv" className='flex items-center bg-white rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered'>
         <div id="leftLoginContent"><img src="src/assets/cardStack.png" alt="Magic: The Gathering Logo" width="300"></img></div>
@@ -60,11 +64,11 @@ function Login()
             <div className='bg-red-50 flex items-center gap-2'>
             Login: <input type="text" id="loginName" placeholder="Username" onChange={handleSetLoginName}
             className=''/>
-            </div><br></br>
+            </div>
             <div className='bg-red-50 flex items-center gap-2'>
             Password: <input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} />
-            </div><br></br>
-            <input type="submit" id="loginButton" className="buttons" value = "Sign In"
+            </div>
+            <input type="submit" id="loginButton" className="buttons" value = "Do It"
                 onClick={doLogin} />
             <span id="loginResult">{message}</span>
         </div>

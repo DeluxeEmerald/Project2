@@ -91,6 +91,7 @@ h1 {
   }
 }
 h2 {
+  color: #ffffff;
   font-size: 24px;
   line-height: 118%;
   letter-spacing: -0.24px;
@@ -134,3 +135,53 @@ code {
   background-attachment: fixed;
   gap: 50px;
 }
+
+#loginButton {
+  background-color: #3d3790;
+  padding: 5px;
+  color: #ffffff;
+  border-radius: 10px;
+}
+
+#magic-collectors {
+  color: #000000;
+  text-align: left;
+}
+
+#logoutButton {
+  padding: 5px;
+  background-color: #3d3790;
+}
+
+#loggedInDiv {
+  justify-content: space-between;
+  padding-left: 20px;
+}
+
+#cardUIDiv {
+  background-image: url("/src/assets/parchment.avif");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+#topBarDiv {
+  flex-grow: 1;
+  gap: 10px;
+  justify-content: space-evenly;
+  background-image: url("/src/assets/parchment.avif");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.topBarButton {
+  padding: 5px;
+  background-color: #3d3790;
+  color: #ffffff;
+  border-radius: 10px;
+  flex: 1 1 auto;
+}
+
