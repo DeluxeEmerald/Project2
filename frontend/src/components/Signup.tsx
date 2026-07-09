@@ -7,7 +7,7 @@ function Signup(){
 
     return(
         <div id="loginDiv" className='mt-40 flex flex-col items-center bg-main rounded-2xl p-8 max-w-m h-full gap-4'>
-        <span id="inner-title" className="font-bold underline text-accent2">PLEASE LOG IN</span><br />
+        <span id="inner-title" className="font-bold underline ">PLEASE LOG IN</span><br />
         <div className='flex items-center gap-2 text-accent1'>
         <p className='w-32'>First Name*:</p> <input type="text" id="firstName" placeholder="First Name"
         className='bg-white'/>

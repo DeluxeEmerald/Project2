@@ -52,20 +52,29 @@ function Login()
         setPassword( e.target.value );
     }
 
+    function toSignUp(){
+        window.location.href = '/Signup';
+    }
+
     return(
-        <div id="loginDiv" className='flex items-center bg-white rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered'>
+        <div id="loginDiv" className='flex items-center bg-white rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered mt-80'>
         <div id="leftLoginContent"><img src="src/assets/cardStack.png" alt="Magic: The Gathering Logo" width="300"></img></div>
-        <div id="rightLoginContent" className='flex-col items-center'>
+        <div id="rightLoginContent" className='flex flex-col items-center gap-3'>
             <img src="src/assets/mtgLogo.png" alt="Magic: The Gathering Logo" width="400"></img><br />
-            <div className='bg-red-50 flex items-center gap-2'>
-            Login: <input type="text" id="loginName" placeholder="Username" onChange={handleSetLoginName}
-            className=''/>
-            </div><br></br>
-            <div className='bg-red-50 flex items-center gap-2'>
-            Password: <input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} />
-            </div><br></br>
-            <input type="submit" id="loginButton" className="buttons" value = "Sign In"
-                onClick={doLogin} />
+            <div className='flex items-center gap-2 text-black'>
+                <p className='w-28'>Login*:</p>
+                <input type="text" id="loginName" placeholder="Username" onChange={handleSetLoginName}
+                className='bg-white'/>
+            </div>
+            <div className='flex items-center gap-2 text-black'>
+                <p className='w-28'>Password*:</p>
+                <input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} 
+                className='bg-white'/>
+            </div>
+            <input type="submit" id="loginButton" value = "Sign In" onClick={doLogin}
+            className='bg-main hover:bg-accent2 text-black rounded-full w-16 border-2 border-black' />
+            <p className='text-black'>Don't have an account? <button onClick={toSignUp}
+            className='text-blue-600 underline hover:cursor-pointer'>Sign Up</button></p>
             <span id="loginResult">{message}</span>
         </div>
         </div>

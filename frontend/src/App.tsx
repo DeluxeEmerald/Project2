@@ -11,6 +11,7 @@ return (
   <Router >
     <Routes>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route path="/cards" element={<CardPage />} />
       <Route path="*" element={<Navigate to="/"/>} />
     </Routes>
