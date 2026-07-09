@@ -2,10 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
+require('dotenv').config();
 
 const MongoClient = require('mongodb').MongoClient;
 //Change to our URL
-const url = "mongodb+srv://Noah:COP4331Root@cluster0.wklmrag.mongodb.net/?appName=Cluster0";
+const url = process.env.MONGO_DB_URL;
 
 const client = new MongoClient(url);
 
