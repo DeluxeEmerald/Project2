@@ -4,6 +4,7 @@ import './App.css';
 
 import LoginPage from './pages/LoginPage';
 import CardPage from './pages/CardPage';
+import SignupPage from './pages/SignupPage';
 
 function App() {
 return (

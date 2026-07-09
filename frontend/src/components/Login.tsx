@@ -52,6 +52,10 @@ function Login()
         setPassword( e.target.value );
     }
 
+    function toSignUp(){
+        window.location.href = '/signup';
+    }
+
     return(
         <div id="loginDiv" className='flex items-center bg-white rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered'>
         <div id="leftLoginContent"><img src="src/assets/cardStack.png" alt="Magic: The Gathering Logo" width="300"></img></div>
