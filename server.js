@@ -82,6 +82,7 @@ app.post('/api/login', async (req, res, next) =>
   {
     id = results[0]._id;
     email = results[0].email;
+    username = results[0].name;
   }
   else
   {
