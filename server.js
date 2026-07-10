@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const MongoClient = require('mongodb').MongoClient;
 //Change to our URL
-const url = process.env.MONGO_DB_URL;
+const url = process.env.MONGODB_URI;
 
 const client = new MongoClient(url);
 client.connect();

@@ -6,6 +6,18 @@ function Login()
     const [loginName,setLoginName] = React.useState('');
     const [loginPassword,setPassword] = React.useState('');
 
+    const app_name = 'cop4331-3.com';
+    function buildPath(route:string) : string
+    {
+        if (process.env.NODE_ENV != 'development')
+        {
+            return 'http://' + app_name + ':5000/' + route;
+        }
+        else
+        {
+            return 'http://localhost:5000/' + route;
+        }
+    }
 
     async function doLogin(event:any) : Promise<void>
     {
@@ -16,8 +28,9 @@ function Login()
         
         try
         {
-            const response = await fetch('http://localhost:5000/api/login',
-            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+            const response = await fetch(buildPath('api/login'),
+            {method:'POST',body:js,headers:{'Content-Type':
+            'application/json'}});
             
             var res = JSON.parse(await response.text());
             

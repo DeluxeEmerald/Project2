@@ -13,6 +13,18 @@ function CardUI()
     const [search,setSearchValue] = React.useState('');
     const [card,setCardNameValue] = React.useState('');
 
+    const app_name = 'cop4331-3.com';
+    function buildPath(route:string) : string
+    {
+        if (process.env.NODE_ENV != 'development')
+        {
+            return 'http://' + app_name + ':5000/' + route;
+        }
+        else
+        {
+            return 'http://localhost:5000/' + route;
+        }
+    }
 
     async function addCard(e:any) : Promise<void>
     {
@@ -21,8 +33,7 @@ function CardUI()
         let js = JSON.stringify(obj);
         try
         {
-            const response = await
-            fetch('http://localhost:5000/api/addcard',
+            const response = await fetch(buildPath('api/addCard'),
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
             
@@ -52,8 +63,7 @@ function CardUI()
         
         try
         {
-            const response = await
-            fetch('http://localhost:5000/api/searchcards',
+            const response = await fetch(buildPath('api/searchCards'),
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
             
