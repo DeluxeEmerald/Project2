@@ -1,7 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 
 :root {
   --text: #6b6375;
@@ -17,7 +17,7 @@
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, "Irish Grover";
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -95,12 +95,11 @@ h1 {
 }
 h2 {
   color: #ffffff;
-  font-size: 24px;
+  font-size: 48px;
   line-height: 118%;
   letter-spacing: -0.24px;
-  margin: 0 0 8px;
   @media (max-width: 1024px) {
-    font-size: 20px;
+    font-size: 48px;
   }
 }
 p {
@@ -147,9 +146,10 @@ code {
   border-radius: 10px;
 }*/
 
-#magic-collectors {
-  color: #000000;
-  text-align: left;
+.top-heading {
+  color: #ffffff;
+  font-size: 48px;
+  padding: 15px;
 }
 
 #logoutButton {
@@ -168,6 +168,7 @@ code {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  flex: 1 1 auto;
 }
 
 /*
@@ -190,3 +191,9 @@ code {
   flex: 1 1 auto;
 }
 */
+
+.irish-grover-regular {
+  font-family: "Irish Grover", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}

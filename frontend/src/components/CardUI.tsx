@@ -92,7 +92,7 @@ function CardUI()
 
     
     return(
-    <div id="cardUIDiv">
+    <div id="cardUIDiv" className='rounded-3xl'>
         <br />
         Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} />
         <button type="button" id="searchCardButton" className="buttons"

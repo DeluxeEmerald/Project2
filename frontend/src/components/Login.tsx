@@ -6,6 +6,7 @@ function Login()
     const [loginName,setLoginName] = React.useState('');
     const [loginPassword,setPassword] = React.useState('');
 
+
     async function doLogin(event:any) : Promise<void>
     {
         event.preventDefault();
@@ -57,7 +58,7 @@ function Login()
     }
 
     return(
-        <div id="loginDiv" className='flex items-center bg-white rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered mt-80'>
+        <div id="loginDiv" className='flex items-center bg-white rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered mt-20'>
         <div id="leftLoginContent"><img src="src/assets/cardStack.png" alt="Magic: The Gathering Logo" width="300"></img></div>
         <div id="rightLoginContent" className='flex flex-col items-center gap-3'>
             <img src="src/assets/mtgLogo.png" alt="Magic: The Gathering Logo" width="400"></img><br />
@@ -68,13 +69,13 @@ function Login()
             </div>
             <div className='flex items-center gap-2 text-black'>
                 <p className='w-28'>Password*:</p>
-                <input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} 
+                <input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} onKeyDown={e => {if (e.key === "Enter") doLogin(e);}}
                 className='bg-white'/>
             </div>
             <input type="submit" id="loginButton" value = "Sign In" onClick={doLogin}
-            className='bg-main hover:bg-accent2 text-black rounded-full w-16 border-2 border-black' />
+            className='bg-main hover:bg-accent2 text-black rounded-full w-16 border-2 border-black hover:cursor-pointer' />
             <p className='text-black'>Don't have an account? <button onClick={toSignUp}
-            className='text-blue-600 underline hover:cursor-pointer'>Sign Up</button></p>
+            className='text-blue-600 underlin hover:cursor-pointer'>Sign Up</button></p>
             <span id="loginResult">{message}</span>
         </div>
         </div>

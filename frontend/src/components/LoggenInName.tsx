@@ -9,9 +9,9 @@ function LoggedInName()
 
     return(
     <div id="loggedInDiv" className="flex">
-        <div><span id="magic-collectors"><h2>Magic Collectors</h2></span></div>
+        <div className="top-heading irish-grover-regular padding:10px">Magic Collectors</div>
         <div className="flex">
-            <span id="userName"><h2>Logged In As John Doe</h2></span>
+            <span className="top-heading irish-grover-regular padding:10px" id="userName">Logged In As John Doe</span>
             <button type="button" id="logoutButton" className="buttons"
             onClick={doLogout}> Log Out </button>
         </div>
