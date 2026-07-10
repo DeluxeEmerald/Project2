@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 
 function LoggedInName()
 {
@@ -22,7 +22,8 @@ function LoggedInName()
     <div id="loggedInDiv" className="flex">
         <div className="top-heading irish-grover-regular padding:10px">Magic Collectors</div>
         <div className="flex">
-            <span className="top-heading irish-grover-regular padding:10px" id="userName">Logged In As {loginName}</span>
+            <span className="top-heading irish-grover-regular padding:10px" 
+            id="userName">Logged In As {loginName}</span>
             <button type="button" id="logoutButton" className="buttons"
             onClick={doLogout}> Log Out </button>
         </div>
