@@ -7,9 +7,9 @@ function Login()
     const [loginPassword,setPassword] = React.useState('');
 
     const app_name = 'cop4331-3.com';
-    function buildPath(route:string) : string
+    function buildPath(route: string): string
     {
-        if (process.env.NODE_ENV != 'development')
+        if (import.meta.env.MODE != 'development')
         {
             return 'http://' + app_name + ':5000/' + route;
         }

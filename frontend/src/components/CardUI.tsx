@@ -5,8 +5,8 @@ function CardUI()
     let _ud : any = localStorage.getItem('user_data');
     let ud = JSON.parse( _ud );
     let userId : string = ud.id;
-    let firstName : string = ud.firstName;
-    let lastName : string = ud.lastName;
+    // let firstName : string = ud.firstName;
+    // let lastName : string = ud.lastName;
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
     const [cardList,setCardList] = useState('');
@@ -14,9 +14,9 @@ function CardUI()
     const [card,setCardNameValue] = React.useState('');
 
     const app_name = 'cop4331-3.com';
-    function buildPath(route:string) : string
+    function buildPath(route: string): string
     {
-        if (process.env.NODE_ENV != 'development')
+        if (import.meta.env.MODE != 'development')
         {
             return 'http://' + app_name + ':5000/' + route;
         }
