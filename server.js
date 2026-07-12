@@ -467,4 +467,9 @@ app.post('/api/getdecks', async (req, res, next) =>
 });
  
 
-app.listen(5000); // start Node + Express server on port 5000
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+app.listen(5000, '0.0.0.0', () => {
+  console.log('Server is running on port 5000');
+});

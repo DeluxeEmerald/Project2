@@ -13,7 +13,7 @@ function CardUI()
     const [search,setSearchValue] = React.useState('');
     const [card,setCardNameValue] = React.useState('');
 
-    const app_name = 'cop4331-3.com';
+    const app_name = 'cop4331-89.xyz';
     function buildPath(route: string): string
     {
         if (import.meta.env.MODE != 'development')

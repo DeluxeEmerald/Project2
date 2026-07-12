@@ -6,7 +6,7 @@ function Login()
     const [loginName,setLoginName] = React.useState('');
     const [loginPassword,setPassword] = React.useState('');
 
-    const app_name = 'cop4331-3.com';
+    const app_name = 'cop4331-89.xyz';
     function buildPath(route: string): string
     {
         if (import.meta.env.MODE != 'development')

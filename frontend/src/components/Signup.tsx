@@ -24,7 +24,7 @@ function Signup(){
         <p className='w-32'>Password*:</p> <input type="password" id="loginPassword" placeholder="Password" className='bg-white' />
         </div>
         <input type="submit" id="loginButton" className="bg-accent1 shadow-lg shadow-accent1/50 rounded-lg w-80 hover:bg-accent2 cursor-pointer" value = "Do It"
-            onClick={x=>toLogin()} />
+            onClick={()=>toLogin()} />
         <span id="loginResult" className="text-accent2">Error Here</span>
         </div>
     );

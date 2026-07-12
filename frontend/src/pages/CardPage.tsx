@@ -1,12 +1,10 @@
-// import PageTitle from '../components/PageTitle';
-import LoggedInName from '../components/LoggenInName.tsx';
-import TopBar from '../components/TopBar.tsx';
-import CardUI from '../components/CardUI.tsx';
+import LoggedInName from '../components/LoggenInName';
+import TopBar from '../components/TopBar';
+import CardUI from '../components/CardUI';
 const CardPage = () =>
 {
     return(
     <div>
-        {/* <PageTitle /> */}
         <LoggedInName />
         <TopBar />
         <CardUI />

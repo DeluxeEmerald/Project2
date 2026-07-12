@@ -1,5 +1,5 @@
-import PageTitle from '../components/PageTitle.tsx';
-import Signup from '../components/Signup.tsx';
+import PageTitle from '../components/PageTitle';
+import Signup from '../components/Signup';
 const SignupPage = () =>
 {
     return(
