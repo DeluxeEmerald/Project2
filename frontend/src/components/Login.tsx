@@ -46,7 +46,7 @@ function Login()
                 
                 setMessage('');
             
-                window.location.href = '/cards';
+                window.location.href = '/packs';
             }
         }
         catch(error:any)

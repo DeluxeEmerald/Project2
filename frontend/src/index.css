@@ -129,13 +129,23 @@ code {
   padding-right: 1rem;
 }
 
-#loginDiv {
+/* #loginDiv {
   background-image: url("/src/assets/parchment.avif");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   gap: 50px;
+} */
+
+
+#loginDiv {
+  background-color: rgba(236, 222, 198, 0.62);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 245, 230, 0.55);
+  box-shadow: 0 12px 32px rgba(88, 62, 36, 0.2);
+  gap: 24px;
 }
 
 /*
@@ -197,3 +207,4 @@ code {
   font-weight: 400;
   font-style: normal;
 }
+

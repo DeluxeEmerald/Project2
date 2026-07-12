@@ -1,13 +1,13 @@
-import LoggedInName from '../components/LoggenInName';
+import LoggedInName from '../components/LoggedInName';
 import TopBar from '../components/TopBar';
-import CardUI from '../components/CardUI';
+import Packs from '../components/Packs';
 const CardPage = () =>
 {
     return(
     <div>
         <LoggedInName />
         <TopBar />
-        <CardUI />
+        <Packs />
     </div>
     );
 }
