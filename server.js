@@ -82,13 +82,14 @@ app.post('/api/login', async (req, res, next) =>
   {
     id = results[0]._id;
     email = results[0].email;
+    username = results[0].name;
   }
   else
   {
     error = 'Invalid name/password';
   }
 
-  var ret = { id:id, email:email, error:error };
+  var ret = { id:id, email:email, username:username, error:error };
   res.status(200).json(ret);
 });
 
