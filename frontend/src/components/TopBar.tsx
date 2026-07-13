@@ -1,18 +1,21 @@
+import { useNavigate } from "react-router-dom";
+
 // import React, {useState} from 'react';
 function TopBar()
 {
+    const navigate = useNavigate();
 
     function toPacks(){
-        window.location.href = '/packs';
+        navigate('/packs');
     }
     function toInventory(){
-        window.location.href = '/inventory';
+        navigate('/inventory');
     }
     function toDecks(){
-        window.location.href = '/decks';
+        navigate('/decks');
     }
     function toSocial(){
-        window.location.href = '/social';
+        navigate('/social');
     }
 
     return(

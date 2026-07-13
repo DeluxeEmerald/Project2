@@ -100,10 +100,16 @@ function Packs()
         setCardNameValue( e.target.value );
     }
 
+    function toPackOpening() {
+
+    }
+
     
     return(
-    <div id="cardUIDiv" className='rounded-3xl w-full flex items-center justify-center'>
-            <img style={{ marginTop:"100px", marginBottom:"100px", maxWidth: '20%' }} src='src/assets/pack.png'></img>
+    <div id="cardUIDiv" className='rounded-3xl w-full flex flex-col items-center justify-center'>
+            <h1 style={{ marginTop:"100px" }}>March of the Machine Epilogue Booster Pack</h1>
+            <img style={{ maxWidth: '20%' }} src='src/assets/pack.png' alt="March of the Machine Epilogue Booster Pack"></img>
+            <button type="button" id="logoutButton" className="buttons" style={{ marginTop:"10px", marginBottom:"100px" }} onClick={()=>toPackOpening}> Open Pack </button>
     </div>
     );
 }

@@ -1,10 +1,12 @@
 import React, {useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Login()
 {
     const [message,setMessage] = useState('');
     const [loginName,setLoginName] = React.useState('');
     const [loginPassword,setPassword] = React.useState('');
+    const navigate = useNavigate();
 
     const app_name = 'cop4331-89.xyz';
     function buildPath(route: string): string
@@ -46,7 +48,7 @@ function Login()
                 
                 setMessage('');
             
-                window.location.href = '/packs';
+                navigate('/packs');
             }
         }
         catch(error:any)
@@ -67,7 +69,7 @@ function Login()
     }
 
     function toSignUp(){
-        window.location.href = '/Signup';
+        navigate('/signup');
     }
 
     return(

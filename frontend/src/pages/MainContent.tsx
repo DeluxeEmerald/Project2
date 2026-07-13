@@ -1,13 +1,13 @@
+import { Outlet } from "react-router-dom";
 import LoggedInName from '../components/LoggedInName';
 import TopBar from '../components/TopBar';
-import Packs from '../components/Packs';
 const CardPage = () =>
 {
     return(
     <div>
         <LoggedInName />
         <TopBar />
-        <Packs />
+        <Outlet />
     </div>
     );
 }
