@@ -1,35 +1,19 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 const app = express();
 require('dotenv').config();
 
-const MongoClient = require('mongodb').MongoClient;
-//Change to our URL
+const { MongoClient, ObjectId } = require('mongodb');
 const url = process.env.MONGODB_URI;
-
 const client = new MongoClient(url);
 client.connect();
 
-var api = require('./api.js');
-api.setApp( app, client );
-
 app.use(cors());
-app.use(bodyParser.json());
-app.use((req, res, next) =>
-{
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-    );
-    res.setHeader(
-        'Access-Control-Allow-Methods',
-        'GET, POST, PATCH, DELETE, OPTIONS'
-    );
-    next();
-});
- 
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'dist')));
+
+require('./api.js')(app, client);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));

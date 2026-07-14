@@ -1,23 +1,20 @@
 import React, {useState} from 'react';
+import { buildPath} from './Path';
+import { storeToken } from '../tokenStorage';
+import { jwtDecode } from 'jwt-decode';
+import type { JwtPayload } from 'jwt-decode';
+
+interface CustomJwtPayload extends JwtPayload
+{
+  name: string;
+  userId: string;
+}
 
 function Login()
 {
     const [message,setMessage] = useState('');
     const [loginName,setLoginName] = React.useState('');
     const [loginPassword,setPassword] = React.useState('');
-
-    const app_name = 'cop4331-89.xyz';
-    function buildPath(route: string): string
-    {
-        if (import.meta.env.MODE != 'development')
-        {
-            return 'http://' + app_name + ':5000/' + route;
-        }
-        else
-        {
-            return 'http://localhost:5000/' + route;
-        }
-    }
 
     async function doLogin(event:any) : Promise<void>
     {
@@ -34,19 +31,21 @@ function Login()
             
             var res = JSON.parse(await response.text());
             
-            if( res.id <= 0 )
+            if( res.error.length > 0 )
             {
                 setMessage('User/Password combination incorrect');
             }
             else
             {
-                var user = 
-                {username: res.username,id:res.id}
-                localStorage.setItem('user_data', JSON.stringify(user));
-                
-                setMessage('');
-            
-                window.location.href = '/packs';
+                const { accessToken } = res;
+                    storeToken(accessToken);
+
+                    const decoded = jwtDecode<CustomJwtPayload>(accessToken);
+                    var user = { name: decoded.name, id: decoded.userId };
+                    localStorage.setItem('user_data', JSON.stringify(user));
+
+                    setMessage('');
+                    window.location.href = '/packs';
             }
         }
         catch(error:any)

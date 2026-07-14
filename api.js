@@ -1,20 +1,26 @@
 require('express');
 require('mongodb');
 
+const token = require('./createJWT.js')
+
+module.exports = function(app, client)
+{
+
+var token = require('./createJWT.js');
+
 app.post('/api/register', async (req, res, next) =>
 {
   // incoming: email, password, name
   // outgoing: id, error
-
+ 
   var error = '';
   const { email, password, name } = req.body;
-
+ 
   const db = client.db('MTG');
-
   const existingUser = await db.collection('Users').find({email:email}).toArray();
-
+ 
   var id = -1;
-
+ 
   if( existingUser.length > 0 )
   {
     error = 'Email already in use';
@@ -33,42 +39,48 @@ app.post('/api/register', async (req, res, next) =>
       id = -1;
     }
   }
-
+ 
   var ret = { id:id, error:error };
   res.status(200).json(ret);
 });
-
+ 
 app.post('/api/login', async (req, res, next) =>
 {
-  // incoming: email, password
-  // outgoing: id, email, name, error 
-
+  // incoming: name, password
+  // outgoing: accessToken, error
+ 
   var error = '';
-  const { name, password } = req.body;
-
+  const {name, password } = req.body;
+ 
   const db = client.db('MTG');
   const results = await db.collection('Users').find({name:name, password:password}).toArray();
-
-  var id = -1;
-  var email = '';
-
+ 
+  var ret;
+ 
   if( results.length > 0 )
   {
-    id = results[0]._id;
-    email = results[0].email;
-    username = results[0].name;
+    try
+    {
+      ret = token.createToken(results[0].name, results[0]._id);
+    }
+    catch(e)
+    {
+      ret = { error: e.message };
+    }
   }
   else
   {
-    error = 'Invalid name/password';
+    ret = { error: 'Invalid email/password' };
   }
-
-  var ret = { id:id, email:email, username:username, error:error };
+ 
   res.status(200).json(ret);
 });
-
-
+ 
+ 
+// ---------------------------------------------------------------------
 // Helper: maps a raw MTGSET document to the full API card object
+// ---------------------------------------------------------------------
+ 
 function buildCardObject(card)
 {
   return {
@@ -92,67 +104,127 @@ function buildCardObject(card)
     gamechanger:   card.Gamechanger
   };
 }
-
+ 
+ 
+// ---------------------------------------------------------------------
+// CARD SEARCH  (MTGSET collection)
+// search matches across: name, manaCost, typeLine, oracleText,
+//                        setName, setCode, artist, rarity, cmc
+// ---------------------------------------------------------------------
+ 
 app.post('/api/searchcards', async (req, res, next) =>
 {
-  // incoming: search (optional), comBan (optional), gamechanger (optional)
-  // outgoing: results[], error
-
+  // incoming: jwtToken, search (optional), comBan (optional), gamechanger (optional)
+  // outgoing: results[], error, jwtToken
+ 
   var error = '';
-  const { search, comBan, gamechanger } = req.body;
-
-  // build the query object dynamically based on what was provided
+  const { jwtToken, search, comBan, gamechanger } = req.body;
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   var query = {};
-
+ 
   if( search && search.trim() !== '' )
   {
-    query.name = { $regex: search.trim() + '.*', $options: 'i' };
+    var _search = search.trim();
+    query.$or = [
+      { name:       { $regex: _search, $options: 'i' } },
+      { manaCost:   { $regex: _search, $options: 'i' } },
+      { typeLine:   { $regex: _search, $options: 'i' } },
+      { oracleText: { $regex: _search, $options: 'i' } },
+      { setName:    { $regex: _search, $options: 'i' } },
+      { setCode:    { $regex: _search, $options: 'i' } },
+      { artist:     { $regex: _search, $options: 'i' } },
+      { rarity:     { $regex: _search, $options: 'i' } },
+      { cmc:        !isNaN(_search) ? Number(_search) : null },
+    ].filter(condition => Object.values(condition)[0] !== null);
   }
-
+ 
   if( comBan === true || comBan === 1 )
   {
     query.ComBan = 1;
   }
-
+ 
   if( gamechanger === true || gamechanger === 1 )
   {
     query.Gamechanger = 1;
   }
-
+ 
   var _ret = [];
-
+ 
   const db = client.db('MTG');
   const results = await db.collection('MTGSET').find(query).toArray();
-
+ 
   for( var i=0; i<results.length; i++ )
   {
     _ret.push( buildCardObject(results[i]) );
   }
-
-  var ret = {results:_ret, error:error};
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { results:_ret, error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
-
+ 
+ 
+// ---------------------------------------------------------------------
+// ADD CARD  (MTGSET collection)
+// ---------------------------------------------------------------------
+ 
 app.post('/api/addcard', async (req, res, next) =>
 {
-  // incoming: name, manaCost, cmc, colors, colorIdentity, typeLine,
-  //           oracleText, power, toughness, loyalty, rarity, setName,
-  //           setCode, artist, imageUrl, ComBan, Gamechanger
-  // outgoing: id, error
-
+  // incoming: jwtToken, name, manaCost, cmc, colors, colorIdentity,
+  //           typeLine, oracleText, power, toughness, loyalty, rarity,
+  //           setName, setCode, artist, imageUrl, ComBan, Gamechanger
+  // outgoing: id, error, jwtToken
+ 
   var error = '';
   var id = -1;
-
+ 
   const {
-    name, manaCost, cmc, colors, colorIdentity, typeLine,
+    jwtToken, name, manaCost, cmc, colors, colorIdentity, typeLine,
     oracleText, power, toughness, loyalty, rarity, setName,
     setCode, artist, imageUrl, ComBan, Gamechanger
   } = req.body;
-
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   try
   {
     const db = client.db('MTG');
-
+ 
     const newCard = {
       name:          name,
       manaCost:      manaCost,
@@ -172,7 +244,7 @@ app.post('/api/addcard', async (req, res, next) =>
       ComBan:        ComBan        || 0,
       Gamechanger:   Gamechanger   || 0
     };
-
+ 
     const result = await db.collection('MTGSET').insertOne(newCard);
     id = result.insertedId;
   }
@@ -180,30 +252,58 @@ app.post('/api/addcard', async (req, res, next) =>
   {
     error = e.toString();
   }
-
-  var ret = { id:id, error:error };
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { id:id, error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
-
+ 
+ 
+// ---------------------------------------------------------------------
+// INVENTORY  (Inventory collection: _id, cardID, total, userID, CardName)
+// ---------------------------------------------------------------------
+ 
 app.post('/api/addinventory', async (req, res, next) =>
 {
-  // incoming: userID, cardID, total
-  // outgoing: error
-
+  // incoming: jwtToken, userID, cardID, total, CardName
+  // outgoing: error, jwtToken
+ 
   var error = '';
-  const { userID, cardID, total } = req.body;
-
+  const { jwtToken, userID, cardID, total, CardName } = req.body;
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   try
   {
     const db = client.db('MTG');
-
+ 
     const existing = await db.collection('Inventory').find(
       {userID:new ObjectId(userID), cardID:new ObjectId(cardID)}
     ).toArray();
-
+ 
     if( existing.length > 0 )
     {
-      // already own some of this card -- just bump the count
       await db.collection('Inventory').updateOne(
         { _id: existing[0]._id },
         { $inc: { total: total } }
@@ -211,8 +311,7 @@ app.post('/api/addinventory', async (req, res, next) =>
     }
     else
     {
-      // first time owning this card -- create the record
-      const newEntry = {cardID:new ObjectId(cardID), userID:new ObjectId(userID), total:total};
+      const newEntry = {cardID:new ObjectId(cardID), userID:new ObjectId(userID), total:total, CardName:CardName};
       await db.collection('Inventory').insertOne(newEntry);
     }
   }
@@ -220,37 +319,60 @@ app.post('/api/addinventory', async (req, res, next) =>
   {
     error = e.toString();
   }
-
-  var ret = { error: error };
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
-
+ 
 app.post('/api/removeinventory', async (req, res, next) =>
 {
-  // incoming: userID, cardID, total
-  // outgoing: error
-
+  // incoming: jwtToken, userID, cardID, total
+  // outgoing: error, jwtToken
+ 
   var error = '';
-  const { userID, cardID, total } = req.body;
-
+  const { jwtToken, userID, cardID, total } = req.body;
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   try
   {
     const db = client.db('MTG');
-
+ 
     const existing = await db.collection('Inventory').find(
       {userID:new ObjectId(userID), cardID:new ObjectId(cardID)}
     ).toArray();
-
+ 
     if( existing.length > 0 )
     {
       var newTotal = existing[0].total - total;
-
+ 
       if( newTotal < 0 )
       {
-        // don't let the count go negative, but keep the record
         newTotal = 0;
       }
-
+ 
       await db.collection('Inventory').updateOne(
         { _id: existing[0]._id },
         { $set: { total: newTotal } }
@@ -265,26 +387,48 @@ app.post('/api/removeinventory', async (req, res, next) =>
   {
     error = e.toString();
   }
-
-  var ret = { error: error };
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
-
+ 
 app.post('/api/getinventory', async (req, res, next) =>
 {
-  // incoming: userID
-  // outgoing: results[], error
-
+  // incoming: jwtToken, userID
+  // outgoing: results[], error, jwtToken
+ 
   var error = '';
-  const { userID } = req.body;
+  const { jwtToken, userID } = req.body;
   var _ret = [];
-
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   try
   {
     const db = client.db('MTG');
-
-    // $lookup joins each Inventory record with its matching MTGSET card
-    // so the response includes the card name/image, not just an ID
+ 
     const results = await db.collection('Inventory').aggregate([
       { $match: { userID: new ObjectId(userID) } },
       { $lookup: {
@@ -296,15 +440,16 @@ app.post('/api/getinventory', async (req, res, next) =>
       },
       { $unwind: '$card' }
     ]).toArray();
-
+ 
     for( var i=0; i<results.length; i++ )
     {
       _ret.push( {
         inventoryId: results[i]._id,
-        cardId: results[i].card._id,
-        name: results[i].card.name,
-        imageUrl: results[i].card.imageUrl,
-        total: results[i].total
+        cardId:      results[i].card._id,
+        name:        results[i].card.name,
+        CardName:    results[i].CardName,
+        imageUrl:    results[i].card.imageUrl,
+        total:       results[i].total
       } );
     }
   }
@@ -312,20 +457,150 @@ app.post('/api/getinventory', async (req, res, next) =>
   {
     error = e.toString();
   }
-
-  var ret = {results:_ret, error:error};
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { results:_ret, error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
-
+ 
+app.post('/api/searchinventory', async (req, res, next) =>
+{
+  // incoming: jwtToken, userID, search (optional), comBan (optional), gamechanger (optional)
+  // outgoing: results[], error, jwtToken
+ 
+  var error = '';
+  const { jwtToken, userID, search, comBan, gamechanger } = req.body;
+  var _ret = [];
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  try
+  {
+    const db = client.db('MTG');
+ 
+    const inventoryResults = await db.collection('Inventory').aggregate([
+      { $match: { userID: new ObjectId(userID) } },
+      { $lookup: {
+          from: 'MTGSET',
+          localField: 'cardID',
+          foreignField: '_id',
+          as: 'card'
+        }
+      },
+      { $unwind: '$card' }
+    ]).toArray();
+ 
+    for( var i=0; i<inventoryResults.length; i++ )
+    {
+      var card = inventoryResults[i].card;
+      var match = true;
+ 
+      if( search && search.trim() !== '' )
+      {
+        var _search = search.trim().toLowerCase();
+        var searchMatch =
+          (card.name        && card.name.toLowerCase().includes(_search))        ||
+          (card.manaCost    && card.manaCost.toLowerCase().includes(_search))     ||
+          (card.typeLine    && card.typeLine.toLowerCase().includes(_search))     ||
+          (card.oracleText  && card.oracleText.toLowerCase().includes(_search))   ||
+          (card.setName     && card.setName.toLowerCase().includes(_search))      ||
+          (card.setCode     && card.setCode.toLowerCase().includes(_search))      ||
+          (card.artist      && card.artist.toLowerCase().includes(_search))       ||
+          (card.rarity      && card.rarity.toLowerCase().includes(_search))       ||
+          (!isNaN(_search)  && card.cmc === Number(_search));
+ 
+        if( !searchMatch ) match = false;
+      }
+ 
+      if( (comBan === true || comBan === 1) && card.ComBan !== 1 )
+      {
+        match = false;
+      }
+ 
+      if( (gamechanger === true || gamechanger === 1) && card.Gamechanger !== 1 )
+      {
+        match = false;
+      }
+ 
+      if( match )
+      {
+        _ret.push( {
+          inventoryId: inventoryResults[i]._id,
+          total:       inventoryResults[i].total,
+          CardName:    inventoryResults[i].CardName,
+          ...buildCardObject(card)
+        } );
+      }
+    }
+  }
+  catch(e)
+  {
+    error = e.toString();
+  }
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { results:_ret, error:error, jwtToken:refreshedToken };
+  res.status(200).json(ret);
+});
+ 
+ 
+// ---------------------------------------------------------------------
+// DECKS  (Decks collection: _id, cards[], deckName, inventoryId, userId)
+// ---------------------------------------------------------------------
+ 
 app.post('/api/createdeck', async (req, res, next) =>
 {
-  // incoming: userId, deckName
-  // outgoing: id, error
-
+  // incoming: jwtToken, userId, deckName
+  // outgoing: id, error, jwtToken
+ 
   var error = '';
-  const { userId, deckName } = req.body;
+  const { jwtToken, userId, deckName } = req.body;
   var id = -1;
-
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   try
   {
     const db = client.db('MTG');
@@ -337,29 +612,52 @@ app.post('/api/createdeck', async (req, res, next) =>
   {
     error = e.toString();
   }
-
-  var ret = { id:id, error:error };
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { id:id, error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
-
+ 
 app.post('/api/addcardtodeck', async (req, res, next) =>
 {
-  // incoming: deckId, cardId, quantity
-  // outgoing: error
-
+  // incoming: jwtToken, deckId, cardId, quantity
+  // outgoing: error, jwtToken
+ 
   var error = '';
-  const { deckId, cardId, quantity } = req.body;
-
+  const { jwtToken, deckId, cardId, quantity } = req.body;
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   try
   {
     const db = client.db('MTG');
-
+ 
     const deck = await db.collection('Decks').findOne({ _id: new ObjectId(deckId) });
     const existingCard = deck.cards.find(c => c.cardId.toString() === cardId);
-
+ 
     if( existingCard )
     {
-      // card is already in the deck -- bump its quantity
       await db.collection('Decks').updateOne(
         { _id: new ObjectId(deckId), "cards.cardId": new ObjectId(cardId) },
         { $inc: { "cards.$.quantity": quantity } }
@@ -367,7 +665,6 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
     }
     else
     {
-      // new card for this deck -- push it onto the array
       await db.collection('Decks').updateOne(
         { _id: new ObjectId(deckId) },
         { $push: { cards: { cardId: new ObjectId(cardId), quantity: quantity } } }
@@ -378,23 +675,47 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
   {
     error = e.toString();
   }
-
-  var ret = { error: error };
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
-
+ 
 app.post('/api/removecardfromdeck', async (req, res, next) =>
 {
-  // incoming: deckId, cardId
-  // outgoing: error
-
+  // incoming: jwtToken, deckId, cardId
+  // outgoing: error, jwtToken
+ 
   var error = '';
-  const { deckId, cardId } = req.body;
-
+  const { jwtToken, deckId, cardId } = req.body;
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   try
   {
     const db = client.db('MTG');
-
+ 
     await db.collection('Decks').updateOne(
       { _id: new ObjectId(deckId) },
       { $pull: { cards: { cardId: new ObjectId(cardId) } } }
@@ -404,31 +725,55 @@ app.post('/api/removecardfromdeck', async (req, res, next) =>
   {
     error = e.toString();
   }
-
-  var ret = { error: error };
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
-
+ 
 app.post('/api/getdecks', async (req, res, next) =>
 {
-  // incoming: userId
-  // outgoing: results[], error
-
+  // incoming: jwtToken, userId
+  // outgoing: results[], error, jwtToken
+ 
   var error = '';
-  const { userId } = req.body;
+  const { jwtToken, userId } = req.body;
   var _ret = [];
-
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
   try
   {
     const db = client.db('MTG');
     const results = await db.collection('Decks').find({ userId: new ObjectId(userId) }).toArray();
-
+ 
     for( var i=0; i<results.length; i++ )
     {
       _ret.push( {
-        id: results[i]._id,
+        id:       results[i]._id,
         deckName: results[i].deckName,
-        cards: results[i].cards
+        cards:    results[i].cards
       } );
     }
   }
@@ -436,7 +781,19 @@ app.post('/api/getdecks', async (req, res, next) =>
   {
     error = e.toString();
   }
-
-  var ret = {results:_ret, error:error};
+ 
+  var refreshedToken = null;
+  try
+  {
+    refreshedToken = token.refresh(jwtToken);
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { results:_ret, error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
+
+}
