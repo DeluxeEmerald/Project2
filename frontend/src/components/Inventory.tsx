@@ -5,8 +5,6 @@ function Inventory()
     let _ud : any = localStorage.getItem('user_data');
     let ud = JSON.parse( _ud );
     let userId : string = ud.id;
-    // let firstName : string = ud.firstName;
-    // let lastName : string = ud.lastName;
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
     const [cardList,setCardList] = useState('');
@@ -102,8 +100,16 @@ function Inventory()
 
     
     return(
-    <div id="cardUIDiv" className='rounded-3xl w-full flex items-center justify-center'>
-        Inventory
+    <div id="cardUIDiv" className='rounded-3xl'>
+        <br />
+        Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} />
+        <button type="button" id="searchCardButton" className="buttons"
+            onClick={searchCard}> Search Card</button><br />
+        <span id="cardSearchResult">{searchResults}</span>
+        <p id="cardList">{cardList}</p><br /><br />
+        Add: <input type="text" id="cardText" placeholder="Card To Add" onChange={handleCardTextChange} />
+        <button type="button" id="addCardButton" className="buttons" onClick={addCard}> Add Card </button><br />
+        <span id="cardAddResult">{message}</span>
     </div>
     );
 }

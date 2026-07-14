@@ -10,6 +10,9 @@ export default {
         'accent1': '#6366f1',
         'accent2': '#f57600'
       },
+      fontFamily: {
+        grover: ['"Irish Grover"', 'sans-serif'],
+      },
     },
   },
   plugins: [],
