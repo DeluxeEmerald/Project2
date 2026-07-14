@@ -1,4 +1,6 @@
 import React, {useState} from 'react';
+import { buildPath} from './Path';
+
 function Decks()
 {
 
@@ -12,19 +14,6 @@ function Decks()
     const [cardList,setCardList] = useState('');
     const [search,setSearchValue] = React.useState('');
     const [card,setCardNameValue] = React.useState('');
-
-    const app_name = 'cop4331-89.xyz';
-    function buildPath(route: string): string
-    {
-        if (import.meta.env.MODE != 'development')
-        {
-            return 'http://' + app_name + ':5000/' + route;
-        }
-        else
-        {
-            return 'http://localhost:5000/' + route;
-        }
-    }
 
     async function addCard(e:any) : Promise<void>
     {
