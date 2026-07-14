@@ -1,6 +1,4 @@
-import { Container } from 'postcss';
 import React, {useState, useRef} from 'react';
-
 
 function Inventory()
 {
@@ -12,8 +10,6 @@ function Inventory()
     const [search,setSearchValue] = React.useState('');
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
-
-    const typeMap = new Map();
 
     const app_name = 'cop4331-89.xyz';
     function buildPath(route: string): string
@@ -31,7 +27,7 @@ function Inventory()
     async function searchCard(e:any) : Promise<void>
     {
         e.preventDefault();
-        let obj = {userId:userId,search:search};
+        let obj = {userId:userId, search:search};
         let js = JSON.stringify(obj);
         
         try
@@ -43,20 +39,22 @@ function Inventory()
             let txt = await response.text();
             let res = JSON.parse(txt);
             let _results = res.results;
+            _results.sort(getSortComparator());
             
             const container = document.getElementById('cardList');
             if (container) {
                 container.innerHTML = '';
 
                 _results.forEach((element: any) => {
-                    const cardAdd = document.createElement('div');
-                    cardAdd.className = 'card';
                     if(checkFilter(element.typeLine, element.rarity)){
-                        cardAdd.innerHTML = `
-                            <img src="${element.imageUrl}" alt="${element.name}" class='h-60 w-40 rounded-md'>`;
-                        container.appendChild(cardAdd);
+                        const cardAdd = document.createElement('div');
+                        cardAdd.className = 'card';
+                        if(checkFilter(element.typeLine, element.rarity)){
+                            cardAdd.innerHTML = `
+                                <img src="${element.imageUrl}" alt="${element.name}" class='h-60 w-40 rounded-md'>`;
+                            container.appendChild(cardAdd);
+                        }
                     }
-                    typeMap.set(element.name, element.typeLine);
                 });
             }
         }
@@ -94,43 +92,74 @@ function Inventory()
 
     function showSort(){
         const container = document.getElementById('sortOption');
-        if (container){
-            if(!isTrueSortRef.current){
-            container.innerHTML = '';
-            container.className ='flex justify-center items-center';
+        if (!container) return;
 
-            const list = document.createElement('form');
-            list.className = 'flex flex-col gap-2 w-40 p-3 rounded-md';
-            list.innerHTML = `
-            <div class="flex items-center gap-1">
-                <input type="radio" id="alphabet" name="sortOption" class="w-4 h-4">
-                <label for="alphabet" class="text-sm whitespace-nowrap">Alphabet</label>
-            </div>
-            <div class="flex items-center gap-1">
-                <input type="radio" id="manaCost" name="sortOption" class="w-4 h-4">
-                <label for="manaCost" class="text-sm whitespace-nowrap">Mana Cost</label>
-            </div>
-            <div class="flex items-center gap-1">
-                <input type="radio" id="rarity" name="sortOption" class="w-4 h-4">
-                <label for="rarity" class="text-sm whitespace-nowrap">Rarity</label>
-            </div>
-            <div class="flex items-center gap-1">
-                <input type="radio" id="color" name="sortOption" class="w-4 h-4">
-                <label for="color" class="text-sm whitespace-nowrap">Color</label>
-            </div>
-            `;
-            container.appendChild(list);
+        if(!isTrueSortRef.current){
+            if (!container.hasChildNodes()){
+                container.className ='flex justify-center items-center';
+
+                const list = document.createElement('div');
+                list.className = 'flex flex-col gap-2 w-40 p-3 rounded-md';
+                list.innerHTML = `
+                <div class="flex items-center gap-1">
+                    <input type="radio" id="alphabet" name="sortOption" class="w-4 h-4">
+                    <label for="alphabet" class="text-sm whitespace-nowrap">Alphabet</label>
+                </div>
+                <div class="flex items-center gap-1">
+                    <input type="radio" id="manaCost" name="sortOption" class="w-4 h-4">
+                    <label for="manaCost" class="text-sm whitespace-nowrap">Mana Cost</label>
+                </div>
+                <div class="flex items-center gap-1">
+                    <input type="radio" id="rarity" name="sortOption" class="w-4 h-4">
+                    <label for="rarity" class="text-sm whitespace-nowrap">Rarity</label>
+                </div>
+                <div class="flex items-center gap-1">
+                    <input type="radio" id="color" name="sortOption" class="w-4 h-4">
+                    <label for="color" class="text-sm whitespace-nowrap">Color</label>
+                </div>
+                `;
+                container.appendChild(list);
+            }
+            container.style.display = 'flex';
             isTrueSortRef.current = true;
-            }
-            else{
-                container.innerHTML = '';
-                isTrueSortRef.current = false;
-            }
+        }
+        else{
+            container.style.display = 'none';
+            isTrueSortRef.current = false;
         }
     }
+        
 
-    function setFilter(e: any){
-        searchCard(e);
+    function getSortComparator(): (a: any, b: any) => number {
+        const rarityOrder: Record<string, number> = {
+            common: 0, uncommon: 1, rare: 2, mythic: 3
+        };
+        const colorOrder: Record<string, number> = {
+            W: 0, U: 1, B: 2, R: 3, G: 4
+        };
+
+        if ((document.getElementById('alphabet') as HTMLInputElement)?.checked) {
+            return (a, b) => a.name.localeCompare(b.name);
+        }
+
+        if ((document.getElementById('manaCost') as HTMLInputElement)?.checked) {
+            return (a, b) => a.cmc - b.cmc;
+        }
+
+        if ((document.getElementById('rarity') as HTMLInputElement)?.checked) {
+            return (a, b) => (rarityOrder[a.rarity.toLowerCase()] ?? 99) -
+                            (rarityOrder[b.rarity.toLowerCase()] ?? 99);
+        }
+
+        if ((document.getElementById('color') as HTMLInputElement)?.checked) {
+            return (a, b) => {
+                const aColor = a.colors?.[0] ? colorOrder[a.colors[0]] : 99;
+                const bColor = b.colors?.[0] ? colorOrder[b.colors[0]] : 99;
+                return aColor - bColor;
+            };
+        }
+
+        return () => 0;
     }
 
     function showFilterOptions(){
@@ -200,13 +229,8 @@ function Inventory()
                     <input type="checkbox" id="mythic" value="mythic" class="w-4 h-4">
                     <label for="mythic" class="text-sm">Mythic</label>
                 </div>
-                <button type="button" class="col-span-2 mx-auto mt-2 px-4 py-1 bg-white rounded-full">Submit</button>
                 `;
                 container.appendChild(list);
-
-                const submitBtn = list.querySelector('button');
-                submitBtn?.addEventListener('click', setFilter);
-
             }
 
             container.style.display = 'flex';
@@ -225,15 +249,15 @@ function Inventory()
             <div>
             Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} 
             className='bg-white' />
-            <button type="button" id="searchCardButton" className="bg-main rounded-full w-32 ml-4"
+            <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"
                 onClick={searchCard}> Search Card</button>
         </div>
 
         <div className='flex flex-col items-center gap-2'>
             <div>
-                <button type="button" id="Sort" className="bg-main w-32"
+                <button type="button" id="Sort" className="bg-main hover:bg-accent2 w-32"
                     onClick={showSort}> Sort</button>   
-                <button type="button" id="Filter" className="bg-main w-32"
+                <button type="button" id="Filter" className="bg-main hover:bg-accent2 w-32"
                     onClick={showFilterOptions}> Filter</button>
             </div>
 
