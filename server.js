@@ -121,59 +121,70 @@ function buildCardObject(card)
 
 app.post('/api/searchcards', async (req, res, next) =>
 {
-  // incoming: search (optional), comBan (optional), gamechanger (optional)
+  // incoming: search (optional), sample (optional), comBan (optional), gamechanger (optional)
   // outgoing: results[], error
   // search matches across: name, manaCost, typeLine, oracleText,
   //                        setName, setCode, artist, rarity, cmc
+  try {
+    var error = '';
+    const { search, sample, comBan, gamechanger } = req.body;
 
-  var error = '';
-  const { search, comBan, gamechanger } = req.body;
+    // build the query object dynamically based on what was provided
+    var query = {};
 
-  // build the query object dynamically based on what was provided
-  var query = {};
+    if( search && search.trim() !== '' )
+    {
+      var _search = search.trim();
+      query.$or = [
+        { name:       { $regex: _search, $options: 'i' } },
+        { manaCost:   { $regex: _search, $options: 'i' } },
+        { typeLine:   { $regex: _search, $options: 'i' } },
+        { oracleText: { $regex: _search, $options: 'i' } },
+        { setName:    { $regex: _search, $options: 'i' } },
+        { setCode:    { $regex: _search, $options: 'i' } },
+        { artist:     { $regex: _search, $options: 'i' } },
+        { rarity:     { $regex: _search, $options: 'i' } },
+        { cmc:        !isNaN(_search) ? Number(_search) : null },
+      ].filter(condition => Object.values(condition)[0] !== null);
+    }
 
-  if( search && search.trim() !== '' )
-  {
-    var _search = search.trim();
-    query.$or = [
-      { name:       { $regex: _search, $options: 'i' } },
-      { manaCost:   { $regex: _search, $options: 'i' } },
-      { typeLine:   { $regex: _search, $options: 'i' } },
-      { oracleText: { $regex: _search, $options: 'i' } },
-      { setName:    { $regex: _search, $options: 'i' } },
-      { setCode:    { $regex: _search, $options: 'i' } },
-      { artist:     { $regex: _search, $options: 'i' } },
-      { rarity:     { $regex: _search, $options: 'i' } },
-      { cmc:        !isNaN(_search) ? Number(_search) : null },
-    ].filter(condition => Object.values(condition)[0] !== null);
+    if( comBan === true || comBan === 1 )
+    {
+      query.ComBan = 1;
+    }
+
+    if( gamechanger === true || gamechanger === 1 )
+    {
+      query.Gamechanger = 1;
+    }
+
+    var pipeline = [{ $match: query }];
+
+    var sampleSize = parseInt(sample, 10);
+
+    // Only add $sample if a valid, finite, positive number was provided.
+    // If sample is omitted, empty, or not a number, skip $sample entirely
+    // and return every matching document (i.e. "infinite" sample size).
+    if (!isNaN(sampleSize) && isFinite(sampleSize) && sampleSize > 0) {
+      pipeline.push({ $sample: { size: sampleSize } });
+    }
+
+    const db = client.db('MTG');
+    const results = await db.collection('MTGSET').aggregate(pipeline).toArray();
+
+
+    var _ret = [];
+
+      for (var i = 0; i < results.length; i++) {
+        _ret.push(buildCardObject(results[i]));
+      }
+
+      res.status(200).json({ results: _ret, error: '' });
   }
-
-  if( comBan === true || comBan === 1 )
-  {
-    query.ComBan = 1;
+  catch (err) {
+    console.error(err);
+    res.status(500).json({ results: [], error: err.toString() });
   }
-
-  if( gamechanger === true || gamechanger === 1 )
-  {
-    query.Gamechanger = 1;
-  }
-
-  var _ret = [];
-
-  const db = client.db('MTG');
-  // THIS LINE WAS MODIFIED TO RETURN A RANDOM SAMPLE RIGHT HERE --> ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
-  const results = await db.collection('MTGSET').aggregate([
-    { $match: query },
-    { $sample: { size: 1 } }
-  ]).toArray();
-  
-  for( var i=0; i<results.length; i++ )
-  {
-    _ret.push( buildCardObject(results[i]) );
-  }
-
-  var ret = {results:_ret, error:error};
-  res.status(200).json(ret);
 });
 
 app.post('/api/addcard', async (req, res, next) =>

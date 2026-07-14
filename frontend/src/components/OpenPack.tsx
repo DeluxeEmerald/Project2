@@ -4,7 +4,7 @@ function OpenPack()
 
     let _ud : any = localStorage.getItem('user_data');
     let ud = JSON.parse( _ud );
-    let userId : string = ud.id;
+    // let userId : string = ud.id;
     // let firstName : string = ud.firstName;
     // let lastName : string = ud.lastName;
     const [pulledText, setPulledText] = useState('');
@@ -27,13 +27,13 @@ function OpenPack()
         }
     }
 
-    async function searchCard(searchTerm: string): Promise<string> {
-        let obj = { userId: userId, search: searchTerm };
+    async function searchCard(searchTerm: string, sampleSize: string): Promise<string> {
+        let obj = { search: searchTerm, sample: sampleSize };
         let js = JSON.stringify(obj);
 
         try
         {
-            const response = await fetch(buildPath('api/searchCards'),
+            const response = await fetch(buildPath('api/searchcards'),
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
             
@@ -75,7 +75,7 @@ function OpenPack()
     async function pullType(cardType: any, cardNum: any): Promise<string> {
         var cardsPulled = "";
         for (var i = 0; i < cardNum; i++) {
-            var pulledCard = await searchCard(cardType);
+            var pulledCard = await searchCard(cardType, "1");
             cardsPulled += (i < cardNum - 1) ? (pulledCard + ", ") : pulledCard;
         }
         return cardsPulled;
