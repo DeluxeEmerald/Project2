@@ -7,6 +7,7 @@ import SignupPage from './pages/SignupPage';
 
 import LoggedInTopBar from './pages/MainContent';
 import Packs from './components/Packs';
+import OpenPack from './components/OpenPack';
 import Inventory from './components/Inventory';
 import Decks from './components/Decks';
 import Social from './components/Social';
@@ -20,6 +21,7 @@ return (
 
       <Route element={<LoggedInTopBar />}>
         <Route path="/packs" element={<Packs />} />
+        <Route path="/openpack" element={<OpenPack />}></Route>
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/decks" element={<Decks />} />
         <Route path="/social" element={<Social />} />
