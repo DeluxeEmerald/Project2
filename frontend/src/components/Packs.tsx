@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 function Packs()
 {
 
@@ -12,6 +13,8 @@ function Packs()
     const [cardList,setCardList] = useState('');
     const [search,setSearchValue] = React.useState('');
     const [card,setCardNameValue] = React.useState('');
+
+    const navigate = useNavigate();
 
     const app_name = 'cop4331-89.xyz';
     function buildPath(route: string): string
@@ -101,7 +104,7 @@ function Packs()
     }
 
     function toPackOpening() {
-
+        navigate('/openpack');
     }
 
     
@@ -109,7 +112,7 @@ function Packs()
     <div id="cardUIDiv" className='rounded-3xl w-full flex flex-col items-center justify-center'>
             <h1 style={{ marginTop:"100px" }}>March of the Machine Epilogue Booster Pack</h1>
             <img style={{ maxWidth: '20%' }} src='src/assets/pack.png' alt="March of the Machine Epilogue Booster Pack"></img>
-            <button type="button" id="logoutButton" className="buttons" style={{ marginTop:"10px", marginBottom:"100px" }} onClick={()=>toPackOpening}> Open Pack </button>
+            <button type="button" id="logoutButton" className="buttons" style={{ marginTop:"10px", marginBottom:"150px" }} onClick={()=>toPackOpening()}> Open Pack </button>
     </div>
     );
 }

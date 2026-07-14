@@ -123,6 +123,8 @@ app.post('/api/searchcards', async (req, res, next) =>
 {
   // incoming: search (optional), comBan (optional), gamechanger (optional)
   // outgoing: results[], error
+  // search matches across: name, manaCost, typeLine, oracleText,
+  //                        setName, setCode, artist, rarity, cmc
 
   var error = '';
   const { search, comBan, gamechanger } = req.body;
@@ -132,7 +134,18 @@ app.post('/api/searchcards', async (req, res, next) =>
 
   if( search && search.trim() !== '' )
   {
-    query.name = { $regex: search.trim() + '.*', $options: 'i' };
+    var _search = search.trim();
+    query.$or = [
+      { name:       { $regex: _search, $options: 'i' } },
+      { manaCost:   { $regex: _search, $options: 'i' } },
+      { typeLine:   { $regex: _search, $options: 'i' } },
+      { oracleText: { $regex: _search, $options: 'i' } },
+      { setName:    { $regex: _search, $options: 'i' } },
+      { setCode:    { $regex: _search, $options: 'i' } },
+      { artist:     { $regex: _search, $options: 'i' } },
+      { rarity:     { $regex: _search, $options: 'i' } },
+      { cmc:        !isNaN(_search) ? Number(_search) : null },
+    ].filter(condition => Object.values(condition)[0] !== null);
   }
 
   if( comBan === true || comBan === 1 )
@@ -148,8 +161,12 @@ app.post('/api/searchcards', async (req, res, next) =>
   var _ret = [];
 
   const db = client.db('MTG');
-  const results = await db.collection('MTGSET').find(query).toArray();
-
+  // THIS LINE WAS MODIFIED TO RETURN A RANDOM SAMPLE RIGHT HERE --> ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
+  const results = await db.collection('MTGSET').aggregate([
+    { $match: query },
+    { $sample: { size: 1 } }
+  ]).toArray();
+  
   for( var i=0; i<results.length; i++ )
   {
     _ret.push( buildCardObject(results[i]) );
