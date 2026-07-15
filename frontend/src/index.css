@@ -14,6 +14,16 @@
   100% {opacity: 0;}
 }
 
+@keyframes unfurlCardsFromCenterAnimation {
+  0% { transform: translateX(var(--slide-distance));}
+  100% { transform: translateX(var(0px));}
+}
+
+#cardImage {
+  max-width: 100%;
+  display: flex;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;

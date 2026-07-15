@@ -148,6 +148,9 @@ app.post('/api/searchcards', async (req, res, next) =>
       ].filter(condition => Object.values(condition)[0] !== null);
     }
 
+    // THIS LINE CAUSES ALL NON-IMAGE CARDS TO BE FILTERED OUT!!!
+    query.imageUrl = { $regex: /^https?:\/\/.+\.(png|jpg|jpeg|webp|gif)(\?.*)?$/i };
+
     if( comBan === true || comBan === 1 )
     {
       query.ComBan = 1;
