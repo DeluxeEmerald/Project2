@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
+import { buildPath} from './Path';
+
 function Packs()
 {
 
@@ -13,21 +15,6 @@ function Packs()
     const [cardList,setCardList] = useState('');
     const [search,setSearchValue] = React.useState('');
     const [card,setCardNameValue] = React.useState('');
-
-    const navigate = useNavigate();
-
-    const app_name = 'cop4331-89.xyz';
-    function buildPath(route: string): string
-    {
-        if (import.meta.env.MODE != 'development')
-        {
-            return 'http://' + app_name + ':5000/' + route;
-        }
-        else
-        {
-            return 'http://localhost:5000/' + route;
-        }
-    }
 
     async function addCard(e:any) : Promise<void>
     {

@@ -1,2 +1,4 @@
 .env
 start-dev.bat
+/frontend/node_modules/
+/node_modules/

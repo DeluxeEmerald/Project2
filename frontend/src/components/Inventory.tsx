@@ -1,4 +1,5 @@
 import React, {useState, useRef} from 'react';
+import { buildPath } from './Path';
 
 function Inventory()
 {
@@ -8,21 +9,38 @@ function Inventory()
     let userId : string = ud.id;
     const [searchResults,setResults] = useState('');
     const [search,setSearchValue] = React.useState('');
+    const [card,setCard] = React.useState('');
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
 
-    const app_name = 'cop4331-89.xyz';
-    function buildPath(route: string): string
+    async function addCard(e:any) : Promise<void>
     {
-        if (import.meta.env.MODE != 'development')
+        e.preventDefault();
+        let obj = {userId:userId,card:card};
+        let js = JSON.stringify(obj);
+        try
         {
-            return 'http://' + app_name + ':5000/' + route;
+            const response = await fetch(buildPath('api/addCard'),
+            {method:'POST',body:js,headers:{'Content-Type':
+            'application/json'}});
+            
+            let txt = await response.text();
+            let res = JSON.parse(txt);
+            
+            if( res.error.length > 0 )
+            {
+                setMessage( "API Error:" + res.error );
+            }
+            else
+            {
+                setMessage('Card has been added');
+            }
         }
-        else
+        catch(error:any)
         {
-            return 'http://localhost:5000/' + route;
+            setMessage(error.toString());
         }
-    }
+    };
 
     async function searchCard(e:any) : Promise<void>
     {
