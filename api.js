@@ -61,7 +61,7 @@ app.post('/api/login', async (req, res, next) =>
   {
     try
     {
-      ret = token.createToken(results[0].name, results[0]._id);
+      ret = token.createToken(results[0].name, results[0]._id, error);
     }
     catch(e)
     {
