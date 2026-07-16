@@ -175,7 +175,8 @@ app.post('/api/searchcards', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -256,7 +257,8 @@ app.post('/api/addcard', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -323,7 +325,8 @@ app.post('/api/addinventory', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -391,7 +394,8 @@ app.post('/api/removeinventory', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -461,7 +465,8 @@ app.post('/api/getinventory', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -562,7 +567,8 @@ app.post('/api/searchinventory', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -616,7 +622,8 @@ app.post('/api/createdeck', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -679,7 +686,8 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -729,7 +737,8 @@ app.post('/api/removecardfromdeck', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {
@@ -785,7 +794,8 @@ app.post('/api/getdecks', async (req, res, next) =>
   var refreshedToken = null;
   try
   {
-    refreshedToken = token.refresh(jwtToken);
+    var refreshResult = token.refresh(jwtToken);
+    refreshedToken = refreshResult.accessToken;
   }
   catch(e)
   {

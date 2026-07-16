@@ -1,5 +1,7 @@
 import React, {useState, useRef} from 'react';
 import { buildPath } from './Path';
+import { storeToken, retrieveToken, clearToken } from '../tokenStorage';
+
 
 function Inventory()
 {
@@ -9,53 +11,32 @@ function Inventory()
     let userId : string = ud.id;
     const [searchResults,setResults] = useState('');
     const [search,setSearchValue] = React.useState('');
-    const [card,setCard] = React.useState('');
+    const [message, setMessage] = useState('');
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
-
-    async function addCard(e:any) : Promise<void>
-    {
-        e.preventDefault();
-        let obj = {userId:userId,card:card};
-        let js = JSON.stringify(obj);
-        try
-        {
-            const response = await fetch(buildPath('api/addCard'),
-            {method:'POST',body:js,headers:{'Content-Type':
-            'application/json'}});
-            
-            let txt = await response.text();
-            let res = JSON.parse(txt);
-            
-            if( res.error.length > 0 )
-            {
-                setMessage( "API Error:" + res.error );
-            }
-            else
-            {
-                setMessage('Card has been added');
-            }
-        }
-        catch(error:any)
-        {
-            setMessage(error.toString());
-        }
-    };
 
     async function searchCard(e:any) : Promise<void>
     {
         e.preventDefault();
-        let obj = {userId:userId, search:search};
+        let obj = {jwtToken: retrieveToken(), search: search};
         let js = JSON.stringify(obj);
         
         try
         {
-            const response = await fetch(buildPath('api/searchCards'),
+            const response = await fetch(buildPath('api/searchcards'),
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
             
             let txt = await response.text();
             let res = JSON.parse(txt);
+            if(res.error && res.error.length > 0){
+                setMessage(res.error);
+            }
+            else{
+                storeToken(res.jwtToken);
+                setSearchValue(res.results);
+            }
+
             let _results = res.results;
             _results.sort(getSortComparator());
             
@@ -78,7 +59,6 @@ function Inventory()
         }
         catch(error:any)
         {
-            alert(error.toString());
             setResults(error.toString());
         }
     };
@@ -285,6 +265,7 @@ function Inventory()
             </div>
         </div>
         <span id="cardSearchResult">{searchResults}</span>
+        <span >{message}</span>
         <p id="cardList" className='flex flex-wrap gap-2 justify-center mb-4' ></p>
     </div>
     );

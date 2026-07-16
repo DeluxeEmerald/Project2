@@ -1,18 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { storeToken, retrieveToken, clearToken } from '../tokenStorage';
 function OpenPack()
 {
 
     let _ud : any = localStorage.getItem('user_data');
     let ud = JSON.parse( _ud );
-    // let userId : string = ud.id;
-    // let firstName : string = ud.firstName;
-    // let lastName : string = ud.lastName;
-    const [pulledText, setPulledText] = useState('');
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
-    const [cardList,setCardList] = useState('');
-    const [search,setSearchValue] = React.useState('');
-    const [card,setCardNameValue] = React.useState('');
     const [showPack, setShowPack] = useState(true);
 
     const dynamicValue = window.innerWidth / 5; 
@@ -36,7 +30,7 @@ function OpenPack()
     }
 
     async function searchCard(searchTerm: string, sampleSize: string): Promise<cardEntry[]> {
-        let obj = { search: searchTerm, sample: sampleSize };
+        let obj = {jwtToken: retrieveToken(), search: searchTerm, sample: sampleSize };
         let js = JSON.stringify(obj);
 
         try
@@ -47,12 +41,26 @@ function OpenPack()
             
             let txt = await response.text();
             let res = JSON.parse(txt);
+            if(res.error && res.error.length > 0){
+                setMessage(res.error);
+            }
+            else{
+                storeToken(res.jwtToken);
+                setResults(res.results);
+            }
             let _results = res.results;
             
+            if (_results && _results.length > 0) {
+                const randomIndex = Math.floor(Math.random() * _results.length);
+                _results = [_results[randomIndex]];
+            }
+
             var cardList: cardEntry[] = [];
             if (cardList) {
                 _results.forEach((element: any) => {
                     const cardAdd = document.createElement('div');
+                    console.log(element.name);
+                    console.log("Pulled");
                     cardAdd.className = 'card';
                     cardAdd.innerHTML = `
                         <img src="${element.imageUrl}" alt="${element.name}" class='h-60 w-40 rounded-md'>`;
@@ -62,7 +70,7 @@ function OpenPack()
             return cardList;
         }
         catch (error: any) {
-            alert(error.toString());
+            console.log("Error");
             setResults(error.toString());
             return [];
         }
