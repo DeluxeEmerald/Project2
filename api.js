@@ -775,7 +775,7 @@ app.post('/api/getdecks', async (req, res, next) =>
   try
   {
     const db = client.db('MTG');
-    const results = await db.collection('Decks').find({ userId: new ObjectId(userId) }).toArray();
+    const results = await db.collection('Decks').find({ userId: userId }).toArray();
  
     for( var i=0; i<results.length; i++ )
     {

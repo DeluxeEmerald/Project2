@@ -34,3 +34,28 @@ export function clearToken(): void
     console.log(e);
   }
 }
+
+export function storeUserID(id: string): void
+{
+  try
+  {
+    localStorage.setItem('user_id', id);
+  }
+  catch(e)
+  {
+    console.log(e);
+  }
+}
+
+export function retrieveUserID(): string
+{
+  try
+  {
+    return localStorage.getItem('user_id') ?? '';
+  }
+  catch(e)
+  {
+    console.log(e);
+    return '';
+  }
+}
