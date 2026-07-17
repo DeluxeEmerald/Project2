@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import { clearToken } from '../tokenStorage';
 
 function LoggedInName()
 {
@@ -7,13 +8,16 @@ function LoggedInName()
     useEffect(() => {
         const raw = localStorage.getItem('user_data');
         if (raw) {
-            setLoginName(JSON.parse(raw).username);
+            setLoginName(JSON.parse(raw).name);
         }
     }, []);
+
+    
 
     function doLogout(event:any) : void
     {
         event.preventDefault();
+        clearToken();
         localStorage.removeItem("user_data")
         window.location.href = '/';
     };
