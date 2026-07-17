@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { buildPath} from './Path';
-import { storeToken } from '../tokenStorage';
+import { storeToken, storeUserID } from '../tokenStorage';
 import { jwtDecode } from 'jwt-decode';
 import type { JwtPayload } from 'jwt-decode';
 
@@ -45,7 +45,7 @@ function Login()
 
                     const decoded = jwtDecode<CustomJwtPayload>(accessToken);
                     var user = { name: decoded.name, id: decoded.userId };
-                    localStorage.setItem('user_data', JSON.stringify(user));
+                    storeUserID(JSON.stringify(user));
 
                     setMessage('');
                     navigate('/packs');
