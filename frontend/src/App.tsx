@@ -11,6 +11,7 @@ import OpenPack from './components/OpenPack';
 import Inventory from './components/Inventory';
 import Decks from './components/Decks';
 import Social from './components/Social';
+import CardDetails from './components/CardDetails';
 
 function App() {
 return (
@@ -25,6 +26,7 @@ return (
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/decks" element={<Decks />} />
         <Route path="/social" element={<Social />} />
+        <Route path="/card/:cardId" element={<CardDetails />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/"/>} />

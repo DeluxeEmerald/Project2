@@ -1,7 +1,7 @@
 import React, {useState, useRef} from 'react';
 import { buildPath } from './Path';
-import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
-
+import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
+import { useNavigate } from 'react-router-dom';
 
 function Inventory()
 {
@@ -14,6 +14,7 @@ function Inventory()
     const [message, setMessage] = useState('');
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
+    const navigate = useNavigate();
 
     async function searchCard(e:any) : Promise<void>
     {
@@ -58,10 +59,12 @@ function Inventory()
                 _results.forEach((element: any) => {
                     if(checkFilter(element.typeLine, element.rarity)){
                         const cardAdd = document.createElement('div');
-                        cardAdd.className = 'card';
+                        cardAdd.className = 'card cursor-pointer';
+                        cardAdd.dataset.cardId = element.id;
                         cardAdd.innerHTML = `
                                 <img src="${element.imageUrl}" alt="${element.name}" class='h-60 w-40 rounded-md'>`;
                             container.appendChild(cardAdd);
+                        cardAdd.addEventListener('click', () => toCardDetails(element.id));
                     }
                 });
             }
@@ -246,6 +249,10 @@ function Inventory()
             isFilterOptionsRef.current = false;
         }
     }
+
+    function toCardDetails(card: any) {
+    navigate(`/card/${card.id}`, { state: { card } });
+}
 
     
     return(
