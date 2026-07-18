@@ -8,7 +8,7 @@ function Inventory()
 
     let _ud : any = retrieveUserID();
     let ud = JSON.parse( _ud );
-    let userId : string = ud.id;
+    let userID : string = ud.id;
     const [searchResults,setResults] = useState('');
     const [search,setSearchValue] = React.useState('');
     const [message, setMessage] = useState('');
@@ -19,13 +19,25 @@ function Inventory()
     {
         e.preventDefault();
         let obj = {jwtToken: retrieveToken(), search: search};
+        let obj2 = {jwtToken: retrieveToken(), userID: userID, search: search};
         let js = JSON.stringify(obj);
+        let js2 = JSON.stringify(obj2);
         
         try
         {
-            const response = await fetch(buildPath('api/searchcards'),
-            {method:'POST',body:js,headers:{'Content-Type':
-            'application/json'}});
+            const selectedInventory = document.getElementById("owned");
+            let response = null;
+
+            if(selectedInventory){
+                response = await fetch(buildPath('api/getinventory'),
+                {method:'POST',body:js2,headers:{'Content-Type':
+                'application/json'}});
+            }
+            else{
+                response = await fetch(buildPath('api/searchcards'),
+                {method:'POST',body:js,headers:{'Content-Type':
+                'application/json'}});
+            }
             
             let txt = await response.text();
             let res = JSON.parse(txt);
@@ -175,11 +187,9 @@ function Inventory()
                 <p class='col-span-2'>Ownership</p>
                 <div class="flex items-center gap-1">
                     <input type="checkbox" id="owned" value="owned" class="w-4 h-4">
-                    <label for="owned" class="text-sm">Owned</label>
+                    <label for="owned" class="text-sm">In Inventory</label>
                 </div>
                 <div class="flex items-center gap-1">
-                    <input type="checkbox" id="notOwned" value="notOwned" class="w-4 h-4">
-                    <label for="notOwned" class="text-sm">Not Owned</label>
                 </div>
                     <p class='col-span-2 justify-center'>Type</p>
                 <div class="flex items-center gap-1">
