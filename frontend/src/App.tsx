@@ -13,6 +13,7 @@ import Card from './components/Card';
 import Decks from './components/Decks';
 import Deck from './components/Deck';
 import Social from './components/Social';
+import CardDetails from './components/CardDetails';
 
 function App() {
 return (
@@ -29,6 +30,7 @@ return (
         <Route path="/decks" element={<Decks />} />
         <Route path="/deckinfo" element={<Deck />} />
         <Route path="/social" element={<Social />} />
+        <Route path="/card/:cardId" element={<CardDetails />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/"/>} />

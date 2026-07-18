@@ -44,7 +44,7 @@ app.post('/api/register', async (req, res, next) =>
   var ret = { id:id, error:error };
   res.status(200).json(ret);
 });
- 
+
 app.post('/api/login', async (req, res, next) =>
 {
   // incoming: name, password
@@ -60,13 +60,13 @@ app.post('/api/login', async (req, res, next) =>
  
   if( results.length > 0 )
   {
-    try
-    {
+      try
+      {
       ret = token.createToken(results[0].name, results[0]._id, error);
-    }
-    catch(e)
-    {
-      ret = { error: e.message };
+      }
+      catch(e)
+      {
+        ret = { error: e.message };
     }
   }
   else
@@ -662,23 +662,23 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
     const db = client.db('MTG');
  
     const deck = await db.collection('Decks').findOne({ _id: new ObjectId(deckId) });
-    const existingCard = deck.cards.find(c => c.cardId.toString() === cardId);
+      const existingCard = deck.cards.find(c => c.cardId.toString() === cardId);
  
-    if( existingCard )
-    {
-      await db.collection('Decks').updateOne(
+      if( existingCard )
+      {
+        await db.collection('Decks').updateOne(
         { _id: new ObjectId(deckId), "cards.cardId": new ObjectId(cardId) },
-        { $inc: { "cards.$.quantity": quantity } }
-      );
-    }
-    else
-    {
-      await db.collection('Decks').updateOne(
+          { $inc: { "cards.$.quantity": quantity } }
+        );
+      }
+      else
+      {
+        await db.collection('Decks').updateOne(
         { _id: new ObjectId(deckId) },
-        { $push: { cards: { cardId: new ObjectId(cardId), quantity: quantity } } }
-      );
+          { $push: { cards: { cardId: new ObjectId(cardId), quantity: quantity } } }
+        );
+      }
     }
-  }
   catch(e)
   {
     error = e.toString();
@@ -725,11 +725,11 @@ app.post('/api/removecardfromdeck', async (req, res, next) =>
   {
     const db = client.db('MTG');
  
-    await db.collection('Decks').updateOne(
+          await db.collection('Decks').updateOne(
       { _id: new ObjectId(deckId) },
-      { $pull: { cards: { cardId: new ObjectId(cardId) } } }
-    );
-  }
+            { $pull: { cards: { cardId: new ObjectId(cardId) } } }
+          );
+        }
   catch(e)
   {
     error = e.toString();
@@ -776,7 +776,7 @@ app.post('/api/getdecks', async (req, res, next) =>
   try
   {
     const db = client.db('MTG');
-
+ 
     const results = await db.collection('Decks').find({ userId: new ObjectId(userId) }).toArray();
  
     for( var i=0; i<results.length; i++ )

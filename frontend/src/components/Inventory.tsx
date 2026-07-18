@@ -60,6 +60,12 @@ function Inventory()
             }
 
             let _results = res.results;
+
+            _results = _results.map((element: any) => ({
+                ...element,
+                id: element.id ?? element.cardId
+            }));
+
             _results.sort(getSortComparator());
             
             const container = document.getElementById('cardList');
@@ -67,6 +73,7 @@ function Inventory()
                 container.innerHTML = '';
 
                 _results.forEach((element: any) => {
+                    console.log(element);
                     if(checkFilter(element.typeLine, element.rarity)){
                         const cardAdd = document.createElement('div');
                         cardAdd.className = 'card';
@@ -260,6 +267,10 @@ function Inventory()
             container.style.display = 'none';
             isFilterOptionsRef.current = false;
         }
+    }
+
+    function toCardDetails(card: any) {
+        navigate(`/card/${card.id}`, { state: { card } });
     }
 
     
