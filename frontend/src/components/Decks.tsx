@@ -15,7 +15,7 @@ function Decks()
     async function getDecks(e:any) : Promise<void>
     {
         e.preventDefault();
-        let obj = {jwtToken: retrieveToken(), userid: JSON.parse(retrieveUserID()).id};
+        let obj = {jwtToken: retrieveToken(), userId: JSON.parse(retrieveUserID()).id};
         let js = JSON.stringify(obj);
         
         try
@@ -33,8 +33,18 @@ function Decks()
                 storeToken(res.jwtToken);
             }
 
-            let results = res._ret;
-                        
+            let results = res.results;
+            
+            const container = document.getElementById("decksContainer");
+
+            if (container) container.innerHTML = '';
+            results.forEach((element: any) => {
+                const div = document.createElement('div');
+                div.className = 'rounded-2xl w-32 h-48 m-4 border-5 bg-black';
+                div.classList.add('deckDiv');
+                div.textContent = element.deckName;
+                container?.appendChild(div);
+            });
         }
         catch(error:any)
         {
@@ -56,11 +66,12 @@ function Decks()
     };
     
     return(
-    <div id="cardUIDiv" className='rounded-3xl w-full flex items-center justify-center'>
+    <div id="cardUIDiv" className='rounded-3xl w-full flex-col items-center justify-center'>
         <button className='rounded-2xl w-32 h-16 m-4 border-5 bg-black' onClick={loadDecks}>Get Decks</button>
+        <div id="decksContainer" className='flex justify-center items-center'></div>
     </div>
     );
 }
 export default Decks;
 
-//<div className='rounded-2xl w-32 h-48 m-4 border-5 bg-black'></div>
+//

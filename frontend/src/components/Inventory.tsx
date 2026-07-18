@@ -1,12 +1,12 @@
 import React, {useState, useRef} from 'react';
 import { buildPath } from './Path';
-import { storeToken, retrieveToken, clearToken } from '../tokenStorage';
+import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
 
 
 function Inventory()
 {
 
-    let _ud : any = localStorage.getItem('user_data');
+    let _ud : any = retrieveUserID();
     let ud = JSON.parse( _ud );
     let userId : string = ud.id;
     const [searchResults,setResults] = useState('');

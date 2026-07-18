@@ -1,5 +1,6 @@
 require('express');
 require('mongodb');
+const { ObjectId } = require('mongodb');
 
 const token = require('./createJWT.js')
 
@@ -775,14 +776,15 @@ app.post('/api/getdecks', async (req, res, next) =>
   try
   {
     const db = client.db('MTG');
-    const results = await db.collection('Decks').find({ userId: userId }).toArray();
+
+    const results = await db.collection('Decks').find({ userId: new ObjectId(userId) }).toArray();
  
     for( var i=0; i<results.length; i++ )
     {
       _ret.push( {
         id:       results[i]._id,
         deckName: results[i].deckName,
-        cards:    results[i].cards
+        // cards:    results[i].cards
       } );
     }
   }

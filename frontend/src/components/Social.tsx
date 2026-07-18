@@ -1,10 +1,11 @@
 import React, {useState} from 'react';
 import { buildPath} from './Path';
+import { retrieveUserID } from '../tokenStorage';
 
 function Social()
 {
 
-    let _ud : any = localStorage.getItem('user_data');
+    let _ud : any = retrieveUserID();
     let ud = JSON.parse( _ud );
     let userId : string = ud.id;
     // let firstName : string = ud.firstName;
