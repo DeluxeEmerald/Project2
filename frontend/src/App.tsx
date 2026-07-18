@@ -9,7 +9,9 @@ import LoggedInTopBar from './pages/MainContent';
 import Packs from './components/Packs';
 import OpenPack from './components/OpenPack';
 import Inventory from './components/Inventory';
+import Card from './components/Card';
 import Decks from './components/Decks';
+import Deck from './components/Deck';
 import Social from './components/Social';
 
 function App() {
@@ -23,7 +25,9 @@ return (
         <Route path="/packs" element={<Packs />} />
         <Route path="/openpack" element={<OpenPack />}></Route>
         <Route path="/inventory" element={<Inventory />} />
+        <Route path="/cardinfo" element={<Card />} />
         <Route path="/decks" element={<Decks />} />
+        <Route path="/deckinfo" element={<Deck />} />
         <Route path="/social" element={<Social />} />
       </Route>
 

@@ -1,6 +1,7 @@
 import React, {useState, useRef} from 'react';
 import { buildPath } from './Path';
 import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
+import { useNavigate } from 'react-router-dom';
 
 
 function Inventory()
@@ -14,6 +15,16 @@ function Inventory()
     const [message, setMessage] = useState('');
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
+    const navigate = useNavigate();
+
+    function ImageButton(imageSrc:string, cardName:string) : string {
+    return `
+    <button class="overflow-hidden rounded-md h-60 w-40" >
+      <img src="${imageSrc}" alt="${cardName}" class="w-full h-full object-cover" />
+    </button>
+    `;
+    }
+
 
     async function searchCard(e:any) : Promise<void>
     {
@@ -59,9 +70,13 @@ function Inventory()
                     if(checkFilter(element.typeLine, element.rarity)){
                         const cardAdd = document.createElement('div');
                         cardAdd.className = 'card';
-                        cardAdd.innerHTML = `
-                                <img src="${element.imageUrl}" alt="${element.name}" class='h-60 w-40 rounded-md'>`;
-                            container.appendChild(cardAdd);
+                        cardAdd.innerHTML = ImageButton(element.imageUrl, element.name);ImageButton
+
+                        cardAdd.querySelector('button')?.addEventListener('click', () => {
+                            navigate('/cardinfo');
+                        });
+
+                        container.appendChild(cardAdd);
                     }
                 });
             }

@@ -1,3 +1,4 @@
+// ---------------TOKENS---------------
 export function storeToken(token: string): void
 {
   try
@@ -35,6 +36,7 @@ export function clearToken(): void
   }
 }
 
+// ---------------USERS---------------
 export function storeUserID(id: string): void
 {
   try
@@ -59,3 +61,9 @@ export function retrieveUserID(): string
     return '';
   }
 }
+
+// ---------------CARDS--------------
+
+
+
+// ---------------DECKS---------------

@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { buildPath} from './Path';
 import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
+import { useNavigate } from 'react-router-dom';
 
 function Decks()
 {
@@ -11,6 +12,24 @@ function Decks()
     const [searchResults,setResults] = useState('');
     const [cardList,setCardList] = useState('');
     const [card,setCardNameValue] = React.useState('');
+
+    const navigate = useNavigate();
+
+    function createNewDeckDiv(text:string, classNames:string) : HTMLDivElement {
+        const div = document.createElement('div');
+        div.className = 'rounded-2xl m-4 border-5 bg-black flex items-center justify-center';
+        div.classList.add(classNames);
+
+        const button: HTMLButtonElement = document.createElement('button');
+        button.textContent = text;
+        button.className = 'flex-1 w-32 h-48'
+        button.onclick = () => navigate('/deckinfo');
+
+        div.appendChild(button);
+
+        // div.textContent = text;
+        return div;
+    }
 
     async function getDecks(e:any) : Promise<void>
     {
@@ -39,12 +58,12 @@ function Decks()
 
             if (container) container.innerHTML = '';
             results.forEach((element: any) => {
-                const div = document.createElement('div');
-                div.className = 'rounded-2xl w-32 h-48 m-4 border-5 bg-black';
-                div.classList.add('deckDiv');
-                div.textContent = element.deckName;
+                const div = createNewDeckDiv(element.deckName, "deckDiv");
                 container?.appendChild(div);
             });
+
+            const div = createNewDeckDiv("Add new deck", "deckDiv");
+            container?.appendChild(div);
         }
         catch(error:any)
         {
@@ -73,5 +92,3 @@ function Decks()
     );
 }
 export default Decks;
-
-//
