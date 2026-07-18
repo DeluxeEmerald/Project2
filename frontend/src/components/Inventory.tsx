@@ -50,6 +50,12 @@ function Inventory()
             }
 
             let _results = res.results;
+
+            _results = _results.map((element: any) => ({
+                ...element,
+                id: element.id ?? element.cardId
+            }));
+
             _results.sort(getSortComparator());
             
             const container = document.getElementById('cardList');
@@ -57,6 +63,7 @@ function Inventory()
                 container.innerHTML = '';
 
                 _results.forEach((element: any) => {
+                    console.log(element);
                     if(checkFilter(element.typeLine, element.rarity)){
                         const cardAdd = document.createElement('div');
                         cardAdd.className = 'card cursor-pointer';
@@ -64,7 +71,7 @@ function Inventory()
                         cardAdd.innerHTML = `
                                 <img src="${element.imageUrl}" alt="${element.name}" class='h-60 w-40 rounded-md'>`;
                             container.appendChild(cardAdd);
-                        cardAdd.addEventListener('click', () => toCardDetails(element.id));
+                        cardAdd.addEventListener('click', () => toCardDetails(element));
                     }
                 });
             }
@@ -251,8 +258,8 @@ function Inventory()
     }
 
     function toCardDetails(card: any) {
-    navigate(`/card/${card.id}`, { state: { card } });
-}
+        navigate(`/card/${card.id}`, { state: { card } });
+    }
 
     
     return(
