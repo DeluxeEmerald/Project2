@@ -1,14 +1,11 @@
 import React, {useState, useRef} from 'react';
 import { buildPath } from './Path';
-import { storeToken, retrieveToken } from '../tokenStorage';
+import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 
 
 function Inventory()
 {
-
-    let _ud : any = localStorage.getItem('user_data');
-    let ud = JSON.parse( _ud );
-    let userID : string = ud.id;
+    const userID = retrieveUserID();
     const [searchResults,setResults] = useState('');
     const [search,setSearchValue] = React.useState('');
     const [message, setMessage] = useState('');
@@ -25,10 +22,10 @@ function Inventory()
         
         try
         {
-            const selectedInventory = document.getElementById("owned");
+            const selectedInventory = document.getElementById("owned") as HTMLInputElement | null;
             let response = null;
 
-            if(selectedInventory){
+            if(selectedInventory?.checked){
                 response = await fetch(buildPath('api/getinventory'),
                 {method:'POST',body:js2,headers:{'Content-Type':
                 'application/json'}});
@@ -46,7 +43,6 @@ function Inventory()
             }
             else{
                 storeToken(res.jwtToken);
-                setSearchValue(res.results);
             }
 
             let _results = res.results;
@@ -60,11 +56,9 @@ function Inventory()
                     if(checkFilter(element.typeLine, element.rarity)){
                         const cardAdd = document.createElement('div');
                         cardAdd.className = 'card';
-                        if(checkFilter(element.typeLine, element.rarity)){
-                            cardAdd.innerHTML = `
+                        cardAdd.innerHTML = `
                                 <img src="${element.imageUrl}" alt="${element.name}" class='h-60 w-40 rounded-md'>`;
                             container.appendChild(cardAdd);
-                        }
                     }
                 });
             }
