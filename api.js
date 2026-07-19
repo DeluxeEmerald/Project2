@@ -1197,4 +1197,64 @@ app.post('/api/searchpublicdecks', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
+app.post('/api/getdecksbycard', async (req, res, next) =>
+{
+  // incoming: jwtToken, userId, cardId
+  // outgoing: deckIDs[], error, jwtToken
+  // Finds which of the given user's decks contain the given card,
+  // and returns just their deckIDs (the cover _id each deck is
+  // linked to — the same id used by addcardtodeck/removecardfromdeck).
+ 
+  var error = '';
+  const { jwtToken, userId, cardId } = req.body;
+  var _ret = [];
+ 
+  try
+  {
+    if( token.isExpired(jwtToken) )
+    {
+      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
+      res.status(200).json(r);
+      return;
+    }
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  try
+  {
+    const db = client.db('MTG');
+ 
+    const results = await db.collection('Decks').find({
+      userId: new ObjectId(userId),
+      "cards.cardId": new ObjectId(cardId)
+    }).toArray();
+ 
+    for( var i=0; i<results.length; i++ )
+    {
+      _ret.push( results[i].deckID );
+    }
+  }
+  catch(e)
+  {
+    error = e.toString();
+  }
+ 
+  var refreshedToken = null;
+  try
+  {
+    var refreshedResult = token.refresh(jwtToken);
+    refreshedToken = refreshedResult.accessToken
+  }
+  catch(e)
+  {
+    console.log(e.message);
+  }
+ 
+  var ret = { deckIDs:_ret, error:error, jwtToken:refreshedToken };
+  res.status(200).json(ret);
+});
+
 }
