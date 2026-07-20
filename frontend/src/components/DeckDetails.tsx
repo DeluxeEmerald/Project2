@@ -1,23 +1,26 @@
-import React, {useState, useRef} from 'react';
-import { buildPath } from './Path';
-import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useRef, useState} from 'react';
+import { buildPath} from './Path';
+import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Inventory from './Inventory';
 
 
-const Inventory = () =>
-{
+function DeckDetails() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const deck = location.state?.deck;
+    // const card = location.state?.card;
+    const cardIDs = deck.cards;
 
-    let _ud : any = retrieveUserID();
-    let ud = JSON.parse( _ud );
-    let userId : string = ud.id;
     const [searchResults,setResults] = useState('');
+    const [message,setMessage] = useState('');
     const [search,setSearchValue] = React.useState('');
-    const [message, setMessage] = useState('');
+    const hasLoaded = useRef(false);
+
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
-    const navigate = useNavigate();
 
-    function ImageButton(imageSrc:string, cardName:string) : string {
+    function ImageButtonCardAdd(imageSrc:string, cardName:string) : string {
     return `
         <button class="h-60 w-40 p-0 border-0 overflow-hidden rounded-[23px]" >
         <img src="${imageSrc}" alt="${cardName}" class="h-full w-full object-contain" />
@@ -26,11 +29,11 @@ const Inventory = () =>
     }
 
 
-    async function searchCard(e:any) : Promise<void>
+    async function searchCardAdd(e:any) : Promise<void>
     {
         e.preventDefault();
         let obj = {jwtToken: retrieveToken(), search: search};
-        let obj2 = {jwtToken: retrieveToken(), userID: userId, search: search};
+        let obj2 = {jwtToken: retrieveToken(), userID: retrieveUserID(), search: search};
         let js = JSON.stringify(obj);
         let js2 = JSON.stringify(obj2);
         
@@ -76,10 +79,10 @@ const Inventory = () =>
                     if(checkFilter(element.typeLine, element.rarity)){
                         const cardAdd = document.createElement('div');
                         cardAdd.className = 'card';
-                        cardAdd.innerHTML = ImageButton(element.imageUrl, element.name);
+                        cardAdd.innerHTML = ImageButtonCardAdd(element.imageUrl, element.name);
 
                         cardAdd.querySelector('button')?.addEventListener('click', () => {
-                            toCardDetails(element);
+                            navigate(`/modifycard/${deck._id}`, { state: { deck:deck, card:element, addrm:true } });
                         });
 
                         container.appendChild(cardAdd);
@@ -268,38 +271,157 @@ const Inventory = () =>
         }
     }
 
-    function toCardDetails(card: any) {
-        navigate(`/card/${card.id}`, { state: { card:card } });
+    if (!deck) {
+        return (
+            <div className='flex flex-col items-center gap-4 text-black p-8 font-grover' id="cardUIDiv">
+                <p>No deck data available. Please go back and select a deck.</p>
+                <button onClick={() => navigate('/decks')} className='bg-main w-32'>Go Back</button>
+            </div>
+        );
     }
 
-    
-    return(
-    <div id="cardUIDiv" className='rounded-3xl w-full flex items-center justify-center flex-col text-black gap-4 font-grover'>
-        <p className='text-black text-xl'>Inventory</p>
-            <div>
-            Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCard(e);}} 
-            className='bg-white' />
-            <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"
-                onClick={searchCard}> Search Card</button>
-        </div>
+    const handleDelete = (card: any) => {
+        const confirmed = window.confirm('Are you sure you want to delete this card?');
+        if (confirmed) {
+            toCardRemoval(card);
+        }
+    };
 
-        <div className='flex flex-col items-center gap-2'>
-            <div>
-                <button type="button" id="Sort" className="bg-main hover:bg-accent2 w-32"
-                    onClick={showSort}> Sort</button>   
-                <button type="button" id="Filter" className="bg-main hover:bg-accent2 w-32"
-                    onClick={showFilterOptions}> Filter</button>
-            </div>
+    function ImageButton(imageSrc:string, cardName:string) : string {
+    return `
+        <button class="h-60 w-40 p-0 border-0 overflow-hidden rounded-[23px]" >
+        <img src="${imageSrc}" alt="${cardName}" class="h-full w-full object-contain" />
+        </button>
+        `;
+    }
 
-            <div className='flex flex-row gap-2'>
-                <div id='sortOption' className=''></div>   
-                <div id='filterOption' className=''></div>
+    function toCardRemoval(card: any) {
+        navigate(`/modifycard/${deck._id}`, { state: { deck:deck, card:card, addrm:false } });
+    }
+
+    async function searchCard(search: string) : Promise<void>
+    {
+        let obj2 = {jwtToken: retrieveToken(), userID: retrieveUserID(), search: search};
+        let js2 = JSON.stringify(obj2);
+        
+        try
+        {
+            let response = null;
+
+            response = await fetch(buildPath('api/searchcards'),
+            {method:'POST',body:js2,headers:{'Content-Type':
+            'application/json'}});
+            
+            
+            let txt = await response.text();
+            let res = JSON.parse(txt);
+            if(res.error && res.error.length > 0){
+                setMessage(res.error);
+            }
+            else{
+                storeToken(res.jwtToken);
+            }
+
+            let _results = res.results;
+
+            _results = _results.map((element: any) => ({
+                ...element,
+                id: element.id ?? element.cardId
+            }));
+
+            const container = document.getElementById('deckCardsList');
+            if (container) {
+                _results.forEach((element: any) => {
+                    const cardAdd = document.createElement('div');
+                    cardAdd.className = 'card';
+                    cardAdd.innerHTML = ImageButton(element.imageUrl, element.name);
+
+                    cardAdd.querySelector('button')?.addEventListener('click', () => {
+                        handleDelete(element);
+                    });
+
+                    container.appendChild(cardAdd);
+                });
+            }
+        }
+        catch(error:any)
+        {
+            setResults(error.toString());
+        }
+    };
+
+    useEffect(() => {
+    if (hasLoaded.current || !cardIDs) return;
+    hasLoaded.current = true;
+
+    async function loadDeckCards() {
+        const container = document.getElementById('deckCardsList');
+        if (container) container.innerHTML = 'Loading...';
+        // await new Promise(resolve => setTimeout(resolve, 2000));
+        if (container) container.innerHTML = '';
+        cardIDs.forEach((element: string) => {
+            searchCard(element);
+        });
+    }
+    loadDeckCards();
+    }, []);
+
+    return (
+        <div className='flex flex-col justify-center text-black'>
+            <div className='rounded-3xl w-full flex flex-col items-center justify-center gap-8 p-6' id="cardUIDiv">
+                <div className='flex flex-col items-center justify-center'>
+                    <div>Click on a card to remove it!</div>
+                    <button className="rounded-2xl w-32 h-16 m-4 border-5 bg-black color text-white" onClick={() => navigate("/decks")}>Go Back</button>
+                    <div className='flex flex-row gap-2'>
+                        <div className='flex flex-col gap-2'>
+                            <h1 className='text-2xl font-bold text-black'>{deck.name}</h1>
+                            <p>Deck Name: {deck.deckName}</p>  
+                            <div id='deckCardsList' className='flex flex-wrap gap-2 justify-center mb-4'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <p className='text-black text-xl'>Add cards to deck</p>
+                    <div>
+                    Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCardAdd(e);}} 
+                    className='bg-white' />
+                    <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"
+                        onClick={searchCardAdd}> Search Card</button>
+                </div>
+
+                <div className='flex flex-col items-center gap-2'>
+                    <div>
+                        <button type="button" id="Sort" className="bg-main hover:bg-accent2 w-32"
+                            onClick={showSort}> Sort</button>   
+                        <button type="button" id="Filter" className="bg-main hover:bg-accent2 w-32"
+                            onClick={showFilterOptions}> Filter</button>
+                    </div>
+
+                    <div className='flex flex-row gap-2'>
+                        <div id='sortOption' className=''></div>   
+                        <div id='filterOption' className=''></div>
+                    </div>
+                </div>
+                    <span id="cardSearchResult">{searchResults}</span>
+                    <span >{message}</span>
+                    <p id="cardList" className='flex flex-wrap gap-2 justify-center mb-4' ></p>
             </div>
         </div>
-        <span id="cardSearchResult">{searchResults}</span>
-        <span >{message}</span>
-        <p id="cardList" className='flex flex-wrap gap-2 justify-center mb-4' ></p>
-    </div>
     );
 }
-export default Inventory;
+
+export default DeckDetails;
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ========================================================================================================================================================
