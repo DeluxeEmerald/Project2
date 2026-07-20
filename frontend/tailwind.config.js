@@ -6,9 +6,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        'main': '#8babf1',
-        'accent1': '#6366f1',
-        'accent2': '#f57600'
+        'main': '#1F5C57',
+        'wood': '#C77D45',
+        'marble': '#E4D6B5',
+        'magic': '#2C3E6B'
       },
       fontFamily: {
         grover: ['"Irish Grover"', 'sans-serif'],

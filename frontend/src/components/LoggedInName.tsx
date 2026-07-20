@@ -23,10 +23,10 @@ function LoggedInName()
     };
 
     return(
-    <div id="loggedInDiv" className="flex">
-        <div className="top-heading irish-grover-regular padding:10px">Magic Collectors</div>
+    <div id="loggedInDiv" className="flex text-gray-50 font-grover">
+        <div className="top-heading padding:10px">Magic Collectors</div>
         <div className="flex">
-            <span className="top-heading irish-grover-regular padding:10px" 
+            <span className="top-heading padding:10px" 
             id="userName">Logged In As {loginName}</span>
             <button type="button" id="logoutButton" className="buttons"
             onClick={doLogout}> Log Out </button>

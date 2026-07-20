@@ -14,12 +14,15 @@ import Decks from './components/Decks';
 import Deck from './components/Deck';
 import Social from './components/Social';
 import CardDetails from './components/CardDetails';
+import SignUpSubmission from './components/SignUpSubmission';
+
 
 function App() {
 return (
   <Router >
     <Routes>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/confirm" element={<SignUpSubmission />} />
       <Route path="/signup" element={<SignupPage />} />
 
       <Route element={<LoggedInTopBar />}>

@@ -178,14 +178,15 @@ code {
 }*/
 
 .top-heading {
-  color: #ffffff;
   font-size: 48px;
   padding: 15px;
 }
 
 #logoutButton {
   padding: 5px;
-  background-color: #3d3790;
+  background-color: #1F5C57;
+  border-width: 2px;
+  border-color: black;
 }
 
 #loggedInDiv {
