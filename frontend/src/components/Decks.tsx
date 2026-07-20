@@ -15,7 +15,15 @@ function Decks()
 
     const navigate = useNavigate();
 
-    function createNewDeckDiv(text:string, classNames:string) : HTMLDivElement {
+    function toDeckDetails(deck: any) {
+        navigate(`/deckdetails/${deck.id}`, { state: { deck:deck } });
+    }
+
+    function toDeckAdd() {
+        navigate(`/createdeck`);
+    }
+
+    function createNewDeckDiv(deck:any, text:string, classNames:string) : HTMLDivElement {
         const div = document.createElement('div');
         div.className = 'rounded-2xl m-4 border-5 bg-black flex items-center justify-center';
         div.classList.add(classNames);
@@ -23,7 +31,7 @@ function Decks()
         const button: HTMLButtonElement = document.createElement('button');
         button.textContent = text;
         button.className = 'flex-1 w-32 h-48'
-        button.onclick = () => navigate('/deckinfo');
+        button.onclick = () => deck ? toDeckDetails(deck) : toDeckAdd();
 
         div.appendChild(button);
 
@@ -58,11 +66,11 @@ function Decks()
 
             if (container) container.innerHTML = '';
             results.forEach((element: any) => {
-                const div = createNewDeckDiv(element.deckName, "deckDiv");
+                const div = createNewDeckDiv(element, element.deckName, "deckDiv");
                 container?.appendChild(div);
             });
 
-            const div = createNewDeckDiv("Add new deck", "deckDiv");
+            const div = createNewDeckDiv(null, "Add new deck", "deckDiv");
             container?.appendChild(div);
         }
         catch(error:any)
