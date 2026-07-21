@@ -72,6 +72,10 @@ function Login()
         navigate('/signup');
     }
 
+    function toResetPassword(){
+        navigate('/requestreset');
+    }
+
     return(
         <div id="loginDiv" className='flex items-center bg-white rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered mt-20'>
         <div id="leftLoginContent"><img src="src/assets/cardStack.png" alt="Magic: The Gathering Logo" width="300"></img></div>
@@ -91,6 +95,9 @@ function Login()
             className='bg-main hover:bg-accent2 text-black rounded-full w-16 border-2 border-black hover:cursor-pointer' />
             <p className='text-black'>Don't have an account? <button onClick={toSignUp}
             className='text-blue-600 underline hover:cursor-pointer'>Sign Up</button></p>
+            <span id="loginResult">{message}</span>
+            <p className='text-black'>Forgot password? <button onClick={toResetPassword}
+            className='text-blue-600 underline hover:cursor-pointer'>Reset</button></p>
             <span id="loginResult">{message}</span>
         </div>
         </div>

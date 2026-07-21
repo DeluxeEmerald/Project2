@@ -12,6 +12,9 @@ import Inventory from './components/Inventory';
 import Decks from './components/Decks';
 import CardDetails from './components/CardDetails';
 import SignUpSubmission from './components/SignUpSubmission';
+import VerifyEmail from './components/VerifyEmail';
+import RequestReset from './components/ResetRequest';
+import ResetPassword from './components/ResetPassword';
 
 import DeckDetails from './components/DeckDetails';
 import Modified from './components/ModifyCardInDeck';
@@ -22,6 +25,9 @@ return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/confirm" element={<SignUpSubmission />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/requestreset" element={<RequestReset />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/signup" element={<SignupPage />} />
 
       <Route element={<LoggedInTopBar />}>
