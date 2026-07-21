@@ -1,10 +1,10 @@
 import React, {useState, useRef, useEffect} from 'react';
 import { buildPath } from './Path';
-import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
+import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
 
 
-const Inventory = () =>
+const Inventory = ({ onCardClick }: { onCardClick?: (card: any) => void }) =>
 {
 
     let _ud : any = retrieveUserID();
@@ -274,8 +274,12 @@ const Inventory = () =>
     }
 
     function toCardDetails(card: any) {
-        navigate(`/card/${card.id}`, { state: { card:card } });
+    if (onCardClick) {
+      onCardClick(card);
+    } else {
+      navigate(`/card/${card.id}`, { state: { card } });
     }
+  }
 
     useEffect(() => {
         if (hasLoaded.current) return;

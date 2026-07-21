@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { buildPath } from './Path';
+import { useNavigate } from 'react-router-dom';
+
 
 function RequestReset() {
   const [message,setMessage] = useState('');
+  const navigate = useNavigate();
 
     async function callReset(){
         const email = (document.getElementById("email") as HTMLInputElement)?.value || '';
@@ -26,6 +29,10 @@ function RequestReset() {
 
     }
 
+    function toLogin(){
+      navigate('/');
+    }
+
   return (
     <div id="loginDiv" className='mt-40 flex flex-col items-center rounded-2xl p-8 max-w-m h-full gap-4'>
         <span id="inner-title" className="font-bold underline text-marble">Please Enter your email to reset your password</span><br />
@@ -39,6 +46,9 @@ function RequestReset() {
       className="bg-main shadow-lg shadow-main/50 rounded-lg w-80 hover:bg-wood 
       cursor-pointer" value = "Reset Password" onClick={callReset}/>
        <span id="loginResult">{message}</span>
+       <input type="submit" id="loginButton" 
+      className="bg-white shadow-lg shadow-main/50 rounded-lg w-80 hover:bg-wood 
+      cursor-pointer" value = "Back To login" onClick={toLogin}/>
     </div>
   );
 }

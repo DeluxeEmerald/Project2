@@ -92,13 +92,12 @@ function Login()
                 className='bg-white'/>
             </div>
             <input type="submit" id="loginButton" value = "Sign In" onClick={doLogin}
-            className='bg-main hover:bg-accent2 text-black rounded-full w-16 border-2 border-black hover:cursor-pointer' />
+            className='bg-main hover:bg-wood text-black rounded-full w-32 border-2 border-black hover:cursor-pointer' />
             <p className='text-black'>Don't have an account? <button onClick={toSignUp}
             className='text-blue-600 underline hover:cursor-pointer'>Sign Up</button></p>
-            <span id="loginResult">{message}</span>
+            <span id="loginResult" className='text-marble'>{message}</span>
             <p className='text-black'>Forgot password? <button onClick={toResetPassword}
             className='text-blue-600 underline hover:cursor-pointer'>Reset</button></p>
-            <span id="loginResult">{message}</span>
         </div>
         </div>
     );

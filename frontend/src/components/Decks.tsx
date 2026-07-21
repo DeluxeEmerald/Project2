@@ -1,16 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
 import { buildPath} from './Path';
-import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
+import { retrieveToken, storeToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
 
 function Decks()
 {
-
-    // let firstName : string = ud.firstName;
-    // let lastName : string = ud.lastName;
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
-    const [cardList,setCardList] = useState('');
     const [card,setCardNameValue] = React.useState('');
         const hasLoaded = useRef(false);
 
@@ -36,7 +32,6 @@ function Decks()
 
         div.appendChild(button);
 
-        // div.textContent = text;
         return div;
     }
 
@@ -79,11 +74,6 @@ function Decks()
             setResults(error.toString());
         }
     };
-    
-    function handleCardTextChange( e: any ) : void
-    {
-        setCardNameValue( e.target.value );
-    }
 
     const loadDecks = async (e: any): Promise<void> => {
         try {
