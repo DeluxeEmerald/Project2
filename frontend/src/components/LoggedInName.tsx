@@ -1,15 +1,14 @@
 import {useState, useEffect} from 'react';
-import { clearToken } from '../tokenStorage';
+import { retrieveUserID ,clearToken } from '../tokenStorage';
 
 function LoggedInName()
 {
     const [loginName, setLoginName] = useState("");
 
     useEffect(() => {
-        const raw = localStorage.getItem('user_data');
-        if (raw) {
-            setLoginName(JSON.parse(raw).name);
-        }
+        const ret = retrieveUserID();
+        let res = JSON.parse(ret);
+        setLoginName(res.name);
     }, []);
 
     
