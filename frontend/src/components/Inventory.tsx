@@ -4,8 +4,10 @@ import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
 
 
-const Inventory = ({ onCardClick }: { onCardClick?: (card: any) => void }) =>
-{
+const Inventory = ({ onCardClick, inventoryOnly }: {
+    onCardClick?: (card: any) => void;
+    inventoryOnly?: boolean;
+}) => {
 
     let _ud : any = retrieveUserID();
     let ud = JSON.parse( _ud );
@@ -40,7 +42,7 @@ const Inventory = ({ onCardClick }: { onCardClick?: (card: any) => void }) =>
         {
             const selectedInventory = document.getElementById("owned") as HTMLInputElement | null;
             var isSearchingInv = true;
-            if (selectedInventory) isSearchingInv = selectedInventory.checked;
+            if (!inventoryOnly && selectedInventory) isSearchingInv = selectedInventory.checked;
 
             let response = null;
 

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { retrieveToken } from '../tokenStorage';
 import { buildPath } from "./Path";
 import { useState } from "react";
@@ -5,6 +6,7 @@ import { useState } from "react";
 function RemoveDeck({deckId} : {deckId : string})
 {
     const [message, setMessage] = useState('');
+    const navigate = useNavigate();
 
     async function doDelete() : Promise<void>
         {
@@ -25,7 +27,7 @@ function RemoveDeck({deckId} : {deckId : string})
                 }
                 else
                 {
-                    setMessage("Deck Deleted");
+                    navigate('/deckdelete');
                 }
             }
             catch(error:any)

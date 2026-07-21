@@ -19,6 +19,7 @@ import ResetPassword from './components/ResetPassword';
 import DeckDetails from './components/DeckDetails';
 import Modified from './components/ModifyCardInDeck';
 import CreateDeck from './components/CreateDeck';
+import DeckDeleteConfirm from './components/DeckDeleteConfirm';
 
 function App() {
 return (
@@ -37,7 +38,8 @@ return (
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/card/:cardId" element={<CardDetails />} />
         <Route path="/decks/" element={<Decks />} />
-        <Route path="/createdeck/" element={<CreateDeck />} />
+        <Route path="/createdeck" element={<CreateDeck />} />
+        <Route path="/deckdelete" element={<DeckDeleteConfirm />} />
         <Route path="/deckdetails/:deckId" element={<DeckDetails />} />
         <Route path="/modifycard/:deckId" element={<Modified />} />
       </Route>

@@ -7,8 +7,7 @@ function Decks()
 {
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
-    const [card,setCardNameValue] = React.useState('');
-        const hasLoaded = useRef(false);
+    const hasLoaded = useRef(false);
 
     const navigate = useNavigate();
 
@@ -17,7 +16,7 @@ function Decks()
     }
 
     function toDeckAdd() {
-        navigate(`/deckcreation`)
+        navigate(`/createdeck`)
     }
 
     function createNewDeckDiv(deck:any, text:string, classNames:string) : HTMLDivElement {
