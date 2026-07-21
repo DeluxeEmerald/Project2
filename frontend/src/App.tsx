@@ -33,7 +33,7 @@ return (
 
       <Route element={<LoggedInTopBar />}>
         <Route path="/packs" element={<Packs />} />
-        <Route path="/openpack" element={<OpenPack />}></Route>
+        <Route path="/openpack" element={<OpenPack />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/card/:cardId" element={<CardDetails />} />
         <Route path="/decks/" element={<Decks />} />

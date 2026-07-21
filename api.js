@@ -29,9 +29,6 @@ async function sendVerificationEmail(email, verificationToken)
     text: `Welcome! Verify your email by visiting: ${verifyLink}`,
     html: `<p>Welcome! Please verify your email by clicking the link below.</p>`
         + `<p><a href="${verifyLink}">Verify Email</a></p>`,
-    trackingSettings: {
-      clickTracking: { enable: false, enableText: false }
-    }
   };
 
   await sgMail.send(msg);

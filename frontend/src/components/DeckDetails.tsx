@@ -27,7 +27,7 @@ function DeckDetails() {
     }
 
     const handleDelete = (card: any) => {
-        const confirmed = window.confirm('Are you sure you want to delete this card?');
+        const confirmed = window.confirm('Are you sure you want to remove this card from the deck?');
         if (confirmed) {
             toCardRemoval(card);
         }
@@ -137,17 +137,3 @@ function DeckDetails() {
 }
 
 export default DeckDetails;
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ========================================================================================================================================================
