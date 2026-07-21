@@ -10,7 +10,6 @@ import Packs from './components/Packs';
 import OpenPack from './components/OpenPack';
 import Inventory from './components/Inventory';
 import Decks from './components/Decks';
-import Social from './components/Social';
 import CardDetails from './components/CardDetails';
 import SignUpSubmission from './components/SignUpSubmission';
 
@@ -33,7 +32,6 @@ return (
         <Route path="/decks/" element={<Decks />} />
         <Route path="/deckdetails/:deckId" element={<DeckDetails />} />
         <Route path="/modifycard/:deckId" element={<Modified />} />
-        <Route path="/social" element={<Social />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/"/>} />

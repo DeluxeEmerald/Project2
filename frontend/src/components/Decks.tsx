@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { buildPath} from './Path';
 import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ function Decks()
     const [searchResults,setResults] = useState('');
     const [cardList,setCardList] = useState('');
     const [card,setCardNameValue] = React.useState('');
+        const hasLoaded = useRef(false);
 
     const navigate = useNavigate();
 
@@ -41,7 +42,7 @@ function Decks()
 
     async function getDecks(e:any) : Promise<void>
     {
-        e.preventDefault();
+        if (e) e.preventDefault();
         let obj = {jwtToken: retrieveToken(), userId: JSON.parse(retrieveUserID()).id};
         let js = JSON.stringify(obj);
         
@@ -91,10 +92,15 @@ function Decks()
             console.log(err);
         }
     };
+
+    useEffect(() => {
+        if (hasLoaded.current) return;
+        hasLoaded.current = true;
+        loadDecks(null);
+    }, []);
     
     return(
     <div id="cardUIDiv" className='rounded-3xl w-full flex-col items-center justify-center'>
-        <button className='rounded-2xl w-32 h-16 m-4 border-5 bg-black' onClick={loadDecks}>Get Decks</button>
         <div id="decksContainer" className='flex justify-center items-center'></div>
     </div>
     );
