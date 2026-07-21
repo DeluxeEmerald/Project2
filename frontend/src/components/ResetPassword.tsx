@@ -83,16 +83,16 @@ function ResetPassword() {
         value = {password} onChange={(e) => setPassword(e.target.value)}
         className='bg-white'/>
         </div>
-      <input type="submit" id="loginButton" className="bg-main shadow-lg shadow-main/50 
-      rounded-lg w-80 hover:bg-wood cursor-pointer" value = "Reset Password"
+      <input type="submit" id="loginButton" className="bg-main text-white hover:text-black shadow-lg shadow-main/50 
+      rounded-lg w-80 hover:bg-wood cursor-pointer border-2 border-black" value = "Reset Password"
       onClick={submitPassword}/>
       <p className="text-marble">{status}</p>
       <span id="loginResult" className="text-marble">
             {errors.map((err, index) => 
                 (<p key = {index}>{err}</p>))}</span>
         <button onClick={toLogin}
-        className="bg-white shadow-lg shadow-main/50 
-        rounded-lg w-80 hover:bg-wood cursor-pointer"
+        className="bg-wood shadow-lg shadow-main/50 text-black hover:text-white border-2 border-black
+        rounded-lg w-80 hover:bg-main cursor-pointer"
         >Back to Login</button>
     </div>
   );

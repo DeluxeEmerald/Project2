@@ -41,7 +41,8 @@ function VerifyEmail() {
                 <p>{status}</p>
             </div>
             <div>
-            <button className="bg-main shadow-lg shadow-main/50 rounded-lg w-80 hover:bg-wood cursor-pointer"
+            <button className="bg-main text-white hover:text-black shadow-lg 
+            shadow-main/50 rounded-lg w-80 hover:bg-wood cursor-pointer border-2 border-black"
             onClick={toLogin}>Back to Login</button>
             </div>
         </div>

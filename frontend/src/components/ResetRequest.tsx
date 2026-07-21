@@ -44,11 +44,11 @@ function RequestReset() {
         </div>
       <input type="submit" id="loginButton" 
       className="bg-main text-white shadow-lg shadow-main/50 rounded-lg w-80 
-      hover:bg-wood hover:text-black cursor-pointer" value = "Reset Password" onClick={callReset}/>
-       <span id="loginResult">{message}</span>
+      hover:bg-wood hover:text-black cursor-pointer border-2 border-black" value = "Reset Password" onClick={callReset}/>
+       <span id="loginResult" className='text-black'>{message}</span>
        <input type="submit" id="loginButton" 
       className="bg-wood text-black shadow-lg shadow-wood/50 rounded-lg w-80
-       hover:bg-main hover:text-white
+       hover:bg-main hover:text-white border-2 border-black
       cursor-pointer" value = "Back To login" onClick={toLogin}/>
     </div>
   );
