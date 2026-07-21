@@ -300,15 +300,19 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
             <div>
             Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCard(e);}} 
             className='bg-white' />
-            <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"
+            <button type="button" id="searchCardButton" 
+            className="bg-main text-white hover:text-black hover:bg-wood rounded-full 
+            w-32 ml-4 border-2 border-black"
                 onClick={searchCard}> Search Card</button>
         </div>
 
         <div className='flex flex-col items-center gap-2'>
             <div>
-                <button type="button" id="Sort" className="bg-main hover:bg-accent2 w-32"
+                <button type="button" id="Sort" className="bg-main text-white hover:text-black 
+                hover:bg-wood w-32 border-2 border-black"
                     onClick={showSort}> Sort</button>   
-                <button type="button" id="Filter" className="bg-main hover:bg-accent2 w-32"
+                <button type="button" id="Filter" className="bg-main text-white hover:text-black 
+                hover:bg-wood w-32 border-2 border-black"
                     onClick={showFilterOptions}> Filter</button>
             </div>
 

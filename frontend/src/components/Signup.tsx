@@ -110,7 +110,8 @@ function Signup(){
         <div className='flex items-center gap-2 text-magic'>
         <p className='w-32'>Password*:</p> <input type="password" id="loginPassword" placeholder="Password" className='bg-white' />
         </div>
-        <input type="submit" id="loginButton" className="bg-main shadow-lg shadow-main/50 rounded-lg w-80 hover:bg-wood cursor-pointer" value = "Do It"
+        <input type="submit" id="loginButton" className="bg-main shadow-lg text-white shadow-main/50 rounded-lg w-80 
+            hover:bg-wood hover:text-black cursor-pointer" value = "Do It"
             onClick={()=>submitSignUp()} />
         <p className='text-black'>Already have an account? <button onClick={toLogin}
             className='text-magic underline hover:cursor-pointer'>Back to Login</button></p>

@@ -16,10 +16,10 @@ function TopBar()
     }
 
     return(
-    <div id="topBarDiv" className="flex bg-main text-black size-12 w-full h-11">
-        <button className="border-2 border-black flex-1" onClick={() => toPacks()}>Packs</button>
-        <button className="border-2 border-black flex-1" onClick={() => toInventory()}>Inventory</button>
-        <button className="border-2 border-black flex-1" onClick={() => toDecks()}>Decks</button>
+    <div id="topBarDiv" className="flex bg-main text-white size-12 w-full h-11 font-grover text-xl">
+        <button className="border-2 border-black flex-1 hover:bg-wood hover:text-black" onClick={() => toPacks()}>Packs</button>
+        <button className="border-2 border-black flex-1 hover:bg-wood hover:text-black" onClick={() => toInventory()}>Inventory</button>
+        <button className="border-2 border-black flex-1 hover:bg-wood hover:text-black" onClick={() => toDecks()}>Decks</button>
     </div>
     );
 }

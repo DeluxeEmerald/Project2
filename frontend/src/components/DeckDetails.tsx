@@ -116,7 +116,8 @@ function DeckDetails() {
             <div className='rounded-3xl w-full flex flex-col items-center justify-center gap-8 
             p-6' id="cardUIDiv">
                 <div className='flex flex-row gap-8 justify-center'>   
-                    <button className="mt-5 w-48 h-8 rounded-full bg-main hover:bg-white font-grover" 
+                    <button className="mt-5 w-48 h-8 rounded-full text-white bg-main 
+                    hover:bg-wood hover:text-black font-grover border-2 border-black" 
                     onClick={() => navigate("/decks")}>Go Back</button>
                     <RemoveDeck deckId={deck.deckID} />
                 </div>

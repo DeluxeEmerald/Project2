@@ -41,7 +41,7 @@ function RemoveDeck({deckId} : {deckId : string})
     <div id="cardUIDiv" className='rounded-3xl w-full flex flex-col items-center 
         justify-center font-grover text-black'>
             <button id="deleteDeck" className="mt-5 mb-10 w-48 h-8 rounded-full 
-                bg-white hover:bg-main" onClick={()=>doDelete()}>Delete Deck</button>
+                bg-wood hover:bg-main hover:text-white border-2 border-black" onClick={()=>doDelete()}>Delete Deck</button>
             <p className="text-black mb-4">{message}</p>
     </div>
     );

@@ -56,9 +56,11 @@ function CreateDeck()
                 placeholder="Deck Name" className="bg-white"></input>
             </div>
             <div className='flex flex-row gap-3'>
-                <button id="createDeck" className="mt-5 mb-10 w-48 rounded-full bg-main hover:bg-white"
+                <button id="createDeck" className="mt-5 mb-10 w-48 rounded-full bg-main 
+                hover:bg-wood text-white hover:text-black border-2 border-black"
                 onClick={()=>toDecks()}>Back</button>
-                <button id="createDeck" className="mt-5 mb-10 w-48 rounded-full bg-white hover:bg-main"
+                <button id="createDeck" className="mt-5 mb-10 w-48 rounded-full 
+                bg-wood hover:bg-main hover:text-white border-2 border-black"
                 onClick={()=>createDeck()}> Create Deck</button>
             </div>
             <p className="text-black mb-4">{message}</p>

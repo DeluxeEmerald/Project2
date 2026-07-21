@@ -27,7 +27,7 @@ function LoggedInName()
         <div className="flex">
             <span className="top-heading padding:10px" 
             id="userName">Logged In As {loginName}</span>
-            <button type="button" id="logoutButton" className="buttons"
+            <button className="bg-main hover:bg-wood hover:text-black w-32 h-13 m-0 p-0 border-2 border-black"
             onClick={doLogout}> Log Out </button>
         </div>
     </div>

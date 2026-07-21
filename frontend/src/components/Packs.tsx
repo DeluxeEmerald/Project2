@@ -9,10 +9,11 @@ function Packs()
 
     
     return(
-    <div id="cardUIDiv" className='rounded-3xl w-full flex flex-col items-center justify-center'>
-            <h1 style={{ marginTop:"100px" }}>March of the Machine Epilogue Booster Pack</h1>
+    <div id="cardUIDiv" className='rounded-3xl w-full flex flex-col items-center justify-center text-black'>
+            <h1 className="mt-8 mb-4 text-black text-xl">March of the Machine Epilogue Booster Pack</h1>
             <img style={{ maxWidth: '20%' }} src='src/assets/pack.png' alt="March of the Machine Epilogue Booster Pack"></img>
-            <button type="button" id="logoutButton" className="buttons" style={{ marginTop:"10px", marginBottom:"150px" }} onClick={()=>toPackOpening()}> Open Pack </button>
+            <button className='text-white bg-main mt-10 mb-10 rounded-lg hover:bg-wood hover:text-black w-32 border-2 border-black' 
+            onClick={()=>toPackOpening()}> Open Pack </button>
     </div>
     );
 }
