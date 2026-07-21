@@ -141,7 +141,7 @@ function CardDetails() {
         <div className='flex justify-center text-black'>
             <div className='rounded-3xl w-full flex flex-col items-center justify-center gap-8 p-6' id="cardUIDiv">
                 <div className='flex flex-col items-center justify-center'>
-                    <button className="rounded-2xl w-32 h-16 m-4 border-5 bg-black color text-white" onClick={() => navigate(-1)}>Go Back</button>
+                    <button className="rounded-2xl w-32 h-16 m-4 border-5 bg-black color text-white" onClick={() => navigate(`/inventory`)}>Go Back</button>
                     <div className='flex flex-row gap-2'>
                         <img src={card.imageUrl} alt={card.name} className='h-96 rounded-xl' /> 
                         <div className='flex flex-col gap-2 items-center'>

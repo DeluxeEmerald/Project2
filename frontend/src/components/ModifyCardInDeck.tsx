@@ -9,6 +9,7 @@ function AddedCardToDeck() {
     const navigate = useNavigate();
 
     const [message,setMessage] = useState('');
+    const [isFinishedLoading,setFinishedLoading] = useState(false);
     const [newDeck,setNewDeck] = useState('');
 
     const deck = location.state?.deck;
@@ -114,6 +115,15 @@ function AddedCardToDeck() {
             }
         };
 
+    function getExitButtons() {
+        return (
+            <div id='exitButtons'>
+                <button onClick={() => navigate("/deckdetails/${deck.id}", { state: { deck:newDeck, card:null } })} className='bg-main w-32'>Go to Deck</button>
+                <button onClick={() => navigate("/card/:cardId", {state: { card:card }})} className='bg-main w-32'>Go Back to Card</button>
+            </div>
+        );
+    }
+
     async function awaitUpdate() {
         setMessage("Loading...");
         console.log(deck);
@@ -126,7 +136,6 @@ function AddedCardToDeck() {
                 setMessage(`${card.name} has been added to ${deck.deckName}.`);
         }
         else {
-            // EXTEND THIS. IN THIS CASE, WE REMOVE A CARD FROM THE DECK
             const error = await removeFromDeck();
             await getDecks();
             if (error.length > 0)
@@ -134,6 +143,8 @@ function AddedCardToDeck() {
             else
                 setMessage(`${card.name} was successfully removed from ${deck.deckName}!`);
         }
+
+        setFinishedLoading(true);
     }
 
     useEffect(() => {
@@ -144,8 +155,8 @@ function AddedCardToDeck() {
 
     const ret = (<div className='flex flex-col items-center gap-4 text-black p-8 font-grover' id="cardUIDiv">
             {message}
-            <button onClick={() => navigate(`/card/:cardId`, {state: { card:card }})} className='bg-main w-32'>Go Back to Card</button>
-            <button onClick={() => navigate(`/deckdetails/${deck.id}`, { state: { deck:newDeck, card:null } })} className='bg-main w-32'>Go to Deck</button>
+            {isFinishedLoading && (<div><button onClick={() => navigate(`/card/:cardId`, {state: { card:card }})} className='bg-main w-32'>Go Back to Card</button><br></br><br></br>
+            <button onClick={() => navigate(`/deckdetails/${deck.id}`, { state: { deck:newDeck, card:null } })} className='bg-main w-32'>Go to Deck</button></div>)}
         </div>);
 
     return ret;
