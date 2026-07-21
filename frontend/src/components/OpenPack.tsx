@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { storeToken, retrieveToken, clearToken } from '../tokenStorage';
+import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
+import { useNavigate } from 'react-router-dom';
 function OpenPack()
 {
 
@@ -8,12 +9,38 @@ function OpenPack()
     const [message,setMessage] = useState('');
     const [searchResults,setResults] = useState('');
     const [showPack, setShowPack] = useState(true);
+    const [showButtons, setShowButtons] = useState(false);
+    const [cardsObtained, setCards] = useState<cardObject[]>([]);
+
+    const navigate = useNavigate();
 
     const dynamicValue = window.innerWidth / 5; 
 
     interface cardEntry {
         name: string;
         html: string;
+    }
+
+    interface cardObject
+    {
+        id:            string,
+        name:          string,
+        manaCost:      string,
+        cmc:           string,
+        colors:        string,
+        colorIdentity: string,
+        typeLine:      string,
+        oracleText:    string,
+        power:         string,
+        toughness:     string,
+        loyalty:       string,
+        rarity:        string,
+        setName:       string,
+        setCode:       string,
+        artist:        string,
+        imageUrl:      string,
+        comBan:        string,
+        gamechanger:   string
     }
 
     const app_name = 'cop4331-89.xyz';
@@ -59,12 +86,12 @@ function OpenPack()
             if (cardList) {
                 _results.forEach((element: any) => {
                     const cardAdd = document.createElement('div');
-                    console.log(element.name);
-                    console.log("Pulled");
                     cardAdd.className = 'card';
                     cardAdd.innerHTML = `
                         <img src="${element.imageUrl}" alt="${element.name}" class='h-60 w-40 rounded-md'>`;
                     cardList.push({ "name":cardAdd.className, "html":cardAdd.innerHTML });
+
+                    setCards(prev => [...prev, element]);
                 });
             }
             return cardList;
@@ -73,6 +100,32 @@ function OpenPack()
             console.log("Error");
             setResults(error.toString());
             return [];
+        }
+    }
+
+    async function addCardToUser(cardID:string): Promise<void> {
+        const userID = JSON.parse(retrieveUserID()).id;
+        let obj = { jwtToken: retrieveToken(), userID:userID, cardID:cardID, total:"1" };
+        let js = JSON.stringify(obj);
+
+         try
+        {
+            const response = await fetch(buildPath('api/addinventory'),
+            {method:'POST',body:js,headers:{'Content-Type':
+            'application/json'}});
+            
+            let txt = await response.text();
+            let res = JSON.parse(txt);
+
+            if(res.error && res.error.length > 0){
+                setMessage(res.error);
+            }
+            else{
+                storeToken(res.jwtToken);
+            }
+        }
+        catch (error: any) {
+            console.log(error);
         }
     }
 
@@ -93,7 +146,6 @@ function OpenPack()
         var cardsPulled: cardEntry[] = [];
         for (var i = 0; i < cardNum; i++) {
             var pulledCard = await searchCard(cardType, "1");
-            console.log("Pulled a " + cardType + " Card: " + pulledCard);
             cardsPulled = [...cardsPulled, ...pulledCard];
         }
         return cardsPulled;
@@ -114,6 +166,7 @@ function OpenPack()
 
         // Process Uncommons
         uncommon.forEach((card) => {
+            
             const cardHTMLAdd = document.createElement('div');
             cardHTMLAdd.className = "card";
             cardHTMLAdd.innerHTML = card.html;
@@ -151,14 +204,28 @@ function OpenPack()
     const handleAnimationEnd = async () => {
         setShowPack(false);
         await new Promise(resolve => setTimeout(resolve, 10));
-        var container = document.getElementById("cardList") as HTMLDivElement;
-        console.log(container);     
+        var container = document.getElementById("cardList") as HTMLDivElement;  
         Array.from(container?.children).forEach(child => {
             (child as HTMLElement).style.setProperty("display", "inline");
         });
+        setShowButtons(true);
     };
 
     const hasPulled = React.useRef(false);
+
+    function toPacks(e:any) {
+        e.preventDefault();
+        navigate('/packs');
+    }
+
+    async function toInventoryWithCards(e:any) {
+        e.preventDefault();
+        cardsObtained.forEach(card => {
+            addCardToUser(card.id);
+        });
+        await new Promise(resolve => setTimeout(resolve, 500));
+        navigate('/inventory');
+    }
 
     useEffect(() => {
         if (hasPulled.current) {
@@ -173,7 +240,10 @@ function OpenPack()
             <h1 style={{color:"black", marginBottom:"126px"}}>These cards were added to your inventory:</h1>
             {showPack && (<img id='packImage' onAnimationEnd={handleAnimationEnd} style={{ animation:"forwards", animationName:"rotatePackAnimation", animationDuration:"3s", transformOrigin:"center center", maxWidth: '20%'}} src='src/assets/pack.png' alt="March of the Machine Epilogue Booster Pack"></img>)}
             <div id='cardList' className='flex flex-wrap gap-2 justify-center'></div>
-            {/* <p style={{color:"black"}}>{JSON.stringify(cards)}</p> */}
+            {showButtons && <div id='buttons'>
+                <button className='bg-black text-white flex-1 w-32 h-16 rounded-full m-[20px]' onClick={toInventoryWithCards}>Accept Cards</button>
+                <button className='bg-black text-white flex-1 w-32 h-16 rounded-full m-[20px]' onClick={toPacks}>Reject Cards</button>
+            </div>}
     </div>
     );
 }
