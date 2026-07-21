@@ -1,7 +1,8 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { buildPath} from './Path';
-import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
+import { retrieveToken, storeToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
+import cardStack from '../assets/cardStack.png';
 
 function Decks()
 {
@@ -9,10 +10,7 @@ function Decks()
     // let firstName : string = ud.firstName;
     // let lastName : string = ud.lastName;
     const [message,setMessage] = useState('');
-    const [searchResults,setResults] = useState('');
-    const [cardList,setCardList] = useState('');
-    const [card,setCardNameValue] = React.useState('');
-        const hasLoaded = useRef(false);
+    const hasLoaded = useRef(false);
 
     const navigate = useNavigate();
 
@@ -26,13 +24,24 @@ function Decks()
 
     function createNewDeckDiv(deck:any, text:string, classNames:string) : HTMLDivElement {
         const div = document.createElement('div');
-        div.className = 'rounded-2xl m-4 border-5 bg-black flex items-center justify-center';
+        div.className = 'rounded-2xl m-4 flex items-center justify-center';
         div.classList.add(classNames);
 
         const button: HTMLButtonElement = document.createElement('button');
-        button.textContent = text;
-        button.className = 'flex-1 w-32 h-48'
+        button.className = 'flex flex-col items-center gap-3 p-2 w-40';
         button.onclick = () => deck ? toDeckDetails(deck) : toDeckAdd();
+
+        const image = document.createElement('img');
+        image.src = cardStack;
+        image.alt = text;
+        image.className = 'w-32 h-48 object-contain';
+
+        const label = document.createElement('span');
+        label.textContent = text;
+        label.className = 'text-center text-sm font-semibold text-white';
+
+        button.appendChild(image);
+        button.appendChild(label);
 
         div.appendChild(button);
 
@@ -76,18 +85,13 @@ function Decks()
         }
         catch(error:any)
         {
-            setResults(error.toString());
+            setMessage(error.toString());
         }
     };
-    
-    function handleCardTextChange( e: any ) : void
-    {
-        setCardNameValue( e.target.value );
-    }
 
     const loadDecks = async (e: any): Promise<void> => {
         try {
-            const result = await getDecks(e);
+            await getDecks(e);
         } catch (err) {
             console.log(err);
         }
@@ -101,7 +105,8 @@ function Decks()
     
     return(
     <div id="cardUIDiv" className='rounded-3xl w-full flex-col items-center justify-center'>
-        <div id="decksContainer" className='flex justify-center items-center'></div>
+        {message && <p className='text-center text-red-600'>{message}</p>}
+        <div id="decksContainer" className='flex flex-wrap justify-center items-start'></div>
     </div>
     );
 }
