@@ -2,7 +2,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import { buildPath} from './Path';
 import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Inventory from './Inventory';
 
 
 function DeckDetails() {
@@ -15,6 +14,7 @@ function DeckDetails() {
     const [searchResults,setResults] = useState('');
     const [message,setMessage] = useState('');
     const [search,setSearchValue] = React.useState('');
+    const [searchEnabled,showInventorySearchFields] = React.useState(false);
     const hasLoaded = useRef(false);
 
     const isTrueSortRef = useRef(false);
@@ -31,18 +31,23 @@ function DeckDetails() {
 
     async function searchCardAdd(e:any) : Promise<void>
     {
-        e.preventDefault();
+        showInventorySearchFields(true);
+        if (e)
+            e.preventDefault();
         let obj = {jwtToken: retrieveToken(), search: search};
-        let obj2 = {jwtToken: retrieveToken(), userID: retrieveUserID(), search: search};
+        let obj2 = {jwtToken: retrieveToken(), userID: JSON.parse(retrieveUserID()).id, search: search};
         let js = JSON.stringify(obj);
         let js2 = JSON.stringify(obj2);
         
         try
         {
             const selectedInventory = document.getElementById("owned") as HTMLInputElement | null;
+            var isSearchingInv = true;
+            if (selectedInventory) isSearchingInv = selectedInventory.checked;
+
             let response = null;
 
-            if(selectedInventory?.checked){
+            if(isSearchingInv){
                 response = await fetch(buildPath('api/getinventory'),
                 {method:'POST',body:js2,headers:{'Content-Type':
                 'application/json'}});
@@ -76,10 +81,10 @@ function DeckDetails() {
                 container.innerHTML = '';
 
                 _results.forEach((element: any) => {
-                    if(checkFilter(element.typeLine, element.rarity)){
+                    if(checkFilter(element.typeLine, element.rarity)) {
                         const cardAdd = document.createElement('div');
                         cardAdd.className = 'card';
-                        cardAdd.innerHTML = ImageButtonCardAdd(element.imageUrl, element.name);
+                        cardAdd.innerHTML = ImageButton(element.imageUrl, element.name);
 
                         cardAdd.querySelector('button')?.addEventListener('click', () => {
                             navigate(`/modifycard/${deck._id}`, { state: { deck:deck, card:element, addrm:true } });
@@ -207,7 +212,7 @@ function DeckDetails() {
                 list.innerHTML = `
                 <p class='col-span-2'>Ownership</p>
                 <div class="flex items-center gap-1">
-                    <input type="checkbox" id="owned" value="owned" class="w-4 h-4">
+                    <input type="checkbox" id="owned" value="owned" class="w-4 h-4" checked>
                     <label for="owned" class="text-sm">In Inventory</label>
                 </div>
                 <div class="flex items-center gap-1">
@@ -281,7 +286,7 @@ function DeckDetails() {
     }
 
     const handleDelete = (card: any) => {
-        const confirmed = window.confirm('Are you sure you want to delete this card?');
+        const confirmed = window.confirm('Are you sure you want to remove this card from the deck?');
         if (confirmed) {
             toCardRemoval(card);
         }
@@ -381,47 +386,40 @@ function DeckDetails() {
                     </div>
                 </div>
 
-                <p className='text-black text-xl'>Add cards to deck</p>
-                    <div>
-                    Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCardAdd(e);}} 
-                    className='bg-white' />
-                    <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"
-                        onClick={searchCardAdd}> Search Card</button>
-                </div>
-
-                <div className='flex flex-col items-center gap-2'>
-                    <div>
-                        <button type="button" id="Sort" className="bg-main hover:bg-accent2 w-32"
-                            onClick={showSort}> Sort</button>   
-                        <button type="button" id="Filter" className="bg-main hover:bg-accent2 w-32"
-                            onClick={showFilterOptions}> Filter</button>
+                {!searchEnabled && (
+                    <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"onClick={searchCardAdd}> Show Inventory to Add Cards </button>
+                )}
+                {searchEnabled && (
+                <div>
+                    <p className='text-black text-xl m-[2px]'>Add cards to deck (No duplicates!)</p>
+                    <div className='m-[10px]'>
+                        Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCardAdd(e);}} 
+                        className='bg-white' />
+                        <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"
+                            onClick={searchCardAdd}> Search Card</button>
                     </div>
+                    
+                    <div className='flex flex-col items-center gap-2'>
+                        <div>
+                            <button type="button" id="Sort" className="bg-main hover:bg-accent2 w-32"
+                                onClick={showSort}> Sort</button>   
+                            <button type="button" id="Filter" className="bg-main hover:bg-accent2 w-32"
+                                onClick={showFilterOptions}> Filter</button>
+                        </div>
 
-                    <div className='flex flex-row gap-2'>
-                        <div id='sortOption' className=''></div>   
-                        <div id='filterOption' className=''></div>
+                        <div className='flex flex-row gap-2'>
+                            <div id='sortOption' className=''></div>   
+                            <div id='filterOption' className=''></div>
+                        </div>
                     </div>
-                </div>
-                    <span id="cardSearchResult">{searchResults}</span>
-                    <span >{message}</span>
-                    <p id="cardList" className='flex flex-wrap gap-2 justify-center mb-4' ></p>
+                </div>)}
+                
+                <span id="cardSearchResult">{searchResults}</span>
+                <span >{message}</span>
+                <p id="cardList" className='flex flex-wrap gap-2 justify-center mb-4' ></p>
             </div>
         </div>
     );
 }
 
 export default DeckDetails;
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ========================================================================================================================================================

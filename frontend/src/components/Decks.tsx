@@ -21,7 +21,7 @@ function Decks()
     }
 
     function toDeckAdd() {
-        navigate(`/createdeck`);
+        navigate(`/deckcreation`)
     }
 
     function createNewDeckDiv(deck:any, text:string, classNames:string) : HTMLDivElement {
