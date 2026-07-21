@@ -10,31 +10,33 @@ function RemoveDeck({deckId} : {deckId : string})
 
     async function doDelete() : Promise<void>
         {
-            confirm("Are you sure you want to delete this deck?");
-            var obj = {jwtToken: retrieveToken(), deckId: deckId};
-            var js = JSON.stringify(obj);            
-            try
-            {
-                const response = await fetch(buildPath('api/removedeck'),
-                {method:'POST',body:js,headers:{'Content-Type':
-                'application/json'}});
-                
-                var res = JSON.parse(await response.text());
-                
-                if( res.error && res.error.length > 0 )
+            const confirmed = window.confirm('Are you sure you want to delete this deck?');
+            if (confirmed) {
+                var obj = {jwtToken: retrieveToken(), deckId: deckId};
+                var js = JSON.stringify(obj);            
+                try
                 {
-                    setMessage(res.error);
+                    const response = await fetch(buildPath('api/removedeck'),
+                    {method:'POST',body:js,headers:{'Content-Type':
+                    'application/json'}});
+                    
+                    var res = JSON.parse(await response.text());
+                    
+                    if( res.error && res.error.length > 0 )
+                    {
+                        setMessage(res.error);
+                    }
+                    else
+                    {
+                        navigate('/deckdelete');
+                    }
                 }
-                else
+                catch(error:any)
                 {
-                    navigate('/deckdelete');
+                    setMessage(error.toString());
+                    return;
                 }
             }
-            catch(error:any)
-            {
-                setMessage(error.toString());
-                return;
-            }         
         };
     
     return(
