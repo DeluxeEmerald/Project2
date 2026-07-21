@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import { buildPath } from './Path';
 import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ const Inventory = () =>
     const [message, setMessage] = useState('');
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
+    const hasLoaded = useRef(false);
     const navigate = useNavigate();
 
     function ImageButton(imageSrc:string, cardName:string) : string {
@@ -28,7 +29,8 @@ const Inventory = () =>
 
     async function searchCard(e:any) : Promise<void>
     {
-        e.preventDefault();
+        if (e)
+            e.preventDefault();
         let obj = {jwtToken: retrieveToken(), search: search};
         let obj2 = {jwtToken: retrieveToken(), userID: userId, search: search};
         let js = JSON.stringify(obj);
@@ -37,9 +39,12 @@ const Inventory = () =>
         try
         {
             const selectedInventory = document.getElementById("owned") as HTMLInputElement | null;
+            var isSearchingInv = true;
+            if (selectedInventory) isSearchingInv = selectedInventory.checked;
+
             let response = null;
 
-            if(selectedInventory?.checked){
+            if(isSearchingInv){
                 response = await fetch(buildPath('api/getinventory'),
                 {method:'POST',body:js2,headers:{'Content-Type':
                 'application/json'}});
@@ -73,7 +78,7 @@ const Inventory = () =>
                 container.innerHTML = '';
 
                 _results.forEach((element: any) => {
-                    if(checkFilter(element.typeLine, element.rarity)){
+                    if(checkFilter(element.typeLine, element.rarity)) {
                         const cardAdd = document.createElement('div');
                         cardAdd.className = 'card';
                         cardAdd.innerHTML = ImageButton(element.imageUrl, element.name);
@@ -204,7 +209,7 @@ const Inventory = () =>
                 list.innerHTML = `
                 <p class='col-span-2'>Ownership</p>
                 <div class="flex items-center gap-1">
-                    <input type="checkbox" id="owned" value="owned" class="w-4 h-4">
+                    <input type="checkbox" id="owned" value="owned" class="w-4 h-4" checked>
                     <label for="owned" class="text-sm">In Inventory</label>
                 </div>
                 <div class="flex items-center gap-1">
@@ -272,6 +277,11 @@ const Inventory = () =>
         navigate(`/card/${card.id}`, { state: { card:card } });
     }
 
+    useEffect(() => {
+        if (hasLoaded.current) return;
+        hasLoaded.current = true;
+        searchCard(null);
+    }, []);
     
     return(
     <div id="cardUIDiv" className='rounded-3xl w-full flex items-center justify-center flex-col text-black gap-4 font-grover'>
