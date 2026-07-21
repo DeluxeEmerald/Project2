@@ -753,126 +753,6 @@ app.post('/api/searchinventory', async (req, res, next) =>
 // DECKS  (Decks collection: _id, cards[], deckName, inventoryId, userId)
 // ---------------------------------------------------------------------
  
-app.post('/api/getdecksbycardin', async (req, res, next) =>
-{
-  // incoming: jwtToken, userId, cardId
-  // outgoing: deckIDs[], error, jwtToken
-  // Finds which of the given user's decks contain the given card,
-  // and returns just their deckIDs (the cover _id each deck is
-  // linked to — the same id used by addcardtodeck/removecardfromdeck).
- 
-  var error = '';
-  const { jwtToken, userId, cardId } = req.body;
-  var _ret = [];
- 
-  try
-  {
-    if( token.isExpired(jwtToken) )
-    {
-      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
-      res.status(200).json(r);
-      return;
-    }
-  }
-  catch(e)
-  {
-    console.log(e.message);
-  }
- 
-  try
-  {
-    const db = client.db('MTG');
-
-  const results = await db.collection('Decks').find({
-    userId: new ObjectId(userId),
-    cards: { $in: [new ObjectId(cardId)] }
-  }).toArray();
- 
-    for( var i=0; i<results.length; i++ )
-    {
-      _ret.push( results[i] );
-    }
-  }
-  catch(e)
-  {
-    error = e.toString();
-  }
- 
-  var refreshedToken = null;
-  try
-  {
-    var refreshedResult = token.refresh(jwtToken);
-    refreshedToken = refreshedResult.accessToken
-  }
-  catch(e)
-  {
-    console.log(e.message);
-  }
- 
-  var ret = { results:_ret, error:error, jwtToken:refreshedToken };
-  res.status(200).json(ret);
-});
-
-app.post('/api/getdecksbycardout', async (req, res, next) =>
-{
-  // incoming: jwtToken, userId, cardId
-  // outgoing: deckIDs[], error, jwtToken
-  // Finds which of the given user's decks contain the given card,
-  // and returns just their deckIDs (the cover _id each deck is
-  // linked to — the same id used by addcardtodeck/removecardfromdeck).
- 
-  var error = '';
-  const { jwtToken, userId, cardId } = req.body;
-  var _ret = [];
- 
-  try
-  {
-    if( token.isExpired(jwtToken) )
-    {
-      var r = { error: 'The JWT is no longer valid', jwtToken: '' };
-      res.status(200).json(r);
-      return;
-    }
-  }
-  catch(e)
-  {
-    console.log(e.message);
-  }
- 
-  try
-  {
-    const db = client.db('MTG');
-
-    const results = await db.collection('Decks').find({
-      userId: new ObjectId(userId),
-      cards: { $ne: new ObjectId(cardId) }
-    }).toArray();
- 
-    for( var i=0; i<results.length; i++ )
-    {
-      _ret.push( results[i] );
-    }
-  }
-  catch(e)
-  {
-    error = e.toString();
-  }
- 
-  var refreshedToken = null;
-  try
-  {
-    var refreshedResult = token.refresh(jwtToken);
-    refreshedToken = refreshedResult.accessToken
-  }
-  catch(e)
-  {
-    console.log(e.message);
-  }
- 
-  var ret = { results:_ret, error:error, jwtToken:refreshedToken };
-  res.status(200).json(ret);
-});
-
 app.post('/api/createdeck', async (req, res, next) =>
 {
   // incoming: jwtToken, userId, deckName, public, inventoryId
@@ -948,7 +828,7 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
   // outgoing: error, jwtToken
  
   var error = '';
-  const { jwtToken, deckId, cardId, quantity } = req.body; // QUANTITY DOES NOTHING
+  const { jwtToken, deckId, cardId, quantity } = req.body;
  
   try
   {
@@ -968,7 +848,7 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
   {
     const db = client.db('MTG');
  
-    const deck = await db.collection('Decks').findOne({ _id: new ObjectId(deckId) });
+    const deck = await db.collection('Decks').findOne({ deckID: new ObjectId(deckId) });
  
     if( !deck )
     {
@@ -976,26 +856,20 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
     }
     else
     {
-      var existingCard = false;
-      deck.cards.forEach(async (element) => {
-        // console.log('e: '+element);
-        // console.log('c: '+cardId);
-        existingCard = ((String(element) == String(cardId)) && (existingCard == false));
-      });
+      const existingCard = deck.cards.find(c => c.cardId.toString() === cardId);
  
       if( existingCard )
       {
-        // await db.collection('Decks').updateOne(
-        //   { _id: new ObjectId(deckId), "cards.cardId": new ObjectId(cardId) }//,
-        //   // { $inc: { "cards.$.quantity": quantity } }
-        // );
-        error = 'The card is already in this deck!';
+        await db.collection('Decks').updateOne(
+          { deckID: new ObjectId(deckId), "cards.cardId": new ObjectId(cardId) },
+          { $inc: { "cards.$.quantity": quantity } }
+        );
       }
       else
       {
         await db.collection('Decks').updateOne(
-          { _id: new ObjectId(deckId) },
-          { $push: { cards: new ObjectId(cardId) /*{ cardId: , quantity: quantity } */ } }
+          { deckID: new ObjectId(deckId) },
+          { $push: { cards: { cardId: new ObjectId(cardId), quantity: quantity } } }
         );
       }
     }
@@ -1009,7 +883,7 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
   try
   {
     var refreshedResult = token.refresh(jwtToken);
-    refreshedToken = refreshedResult.accessToken;
+    refreshedToken = refreshedResult.accessToken
   }
   catch(e)
   {
@@ -1046,7 +920,7 @@ app.post('/api/removecardfromdeck', async (req, res, next) =>
   {
     const db = client.db('MTG');
  
-    const deck = await db.collection('Decks').findOne({ _id: new ObjectId(deckId) });
+    const deck = await db.collection('Decks').findOne({ deckID: new ObjectId(deckId) });
  
     if( !deck )
     {
@@ -1054,10 +928,7 @@ app.post('/api/removecardfromdeck', async (req, res, next) =>
     }
     else
     {
-      const existingCard = deck.cards.find(c => c.toString() === cardId);
-      deck.cards.forEach((element) => {
-        console.log(element.toString() === cardId);
-      });
+      const existingCard = deck.cards.find(c => c.cardId.toString() === cardId);
  
       if( !existingCard )
       {
@@ -1067,12 +938,21 @@ app.post('/api/removecardfromdeck', async (req, res, next) =>
       {
         var newQuantity = existingCard.quantity - quantity;
  
-        // Fully removed — drop the card entry from the array.
-        await db.collection('Decks').updateOne(
-          { _id: new ObjectId(deckId) },
-          { $pullAll: { cards: [new ObjectId(cardId)] } }
-        );
-      
+        if( newQuantity <= 0 )
+        {
+          // Fully removed — drop the card entry from the array.
+          await db.collection('Decks').updateOne(
+            { deckID: new ObjectId(deckId) },
+            { $pull: { cards: { cardId: new ObjectId(cardId) } } }
+          );
+        }
+        else
+        {
+          await db.collection('Decks').updateOne(
+            { deckID: new ObjectId(deckId), "cards.cardId": new ObjectId(cardId) },
+            { $set: { "cards.$.quantity": newQuantity } }
+          );
+        }
       }
     }
   }

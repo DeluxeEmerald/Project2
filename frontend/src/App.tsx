@@ -12,6 +12,8 @@ import Inventory from './components/Inventory';
 import Decks from './components/Decks';
 import Social from './components/Social';
 import CardDetails from './components/CardDetails';
+import SignUpSubmission from './components/SignUpSubmission';
+
 import DeckDetails from './components/DeckDetails';
 import Modified from './components/ModifyCardInDeck';
 
@@ -20,6 +22,7 @@ return (
   <Router >
     <Routes>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/confirm" element={<SignUpSubmission />} />
       <Route path="/signup" element={<SignupPage />} />
 
       <Route element={<LoggedInTopBar />}>

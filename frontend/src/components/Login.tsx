@@ -90,7 +90,7 @@ function Login()
             <input type="submit" id="loginButton" value = "Sign In" onClick={doLogin}
             className='bg-main hover:bg-accent2 text-black rounded-full w-16 border-2 border-black hover:cursor-pointer' />
             <p className='text-black'>Don't have an account? <button onClick={toSignUp}
-            className='text-blue-600 underlin hover:cursor-pointer'>Sign Up</button></p>
+            className='text-blue-600 underline hover:cursor-pointer'>Sign Up</button></p>
             <span id="loginResult">{message}</span>
         </div>
         </div>
