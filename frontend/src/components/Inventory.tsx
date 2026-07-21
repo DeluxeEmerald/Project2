@@ -280,7 +280,12 @@ const Inventory = () =>
     useEffect(() => {
         if (hasLoaded.current) return;
         hasLoaded.current = true;
-        searchCard(null);
+
+        const run = async () => {
+            await searchCard(null);
+        };
+
+        run();
     }, []);
     
     return(

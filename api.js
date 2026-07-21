@@ -470,9 +470,9 @@ app.post('/api/addinventory', async (req, res, next) =>
   try
   {
     const db = client.db('MTG');
- 
+
     const existing = await db.collection('Inventory').find(
-      {userID:new ObjectId(userID), cardID:new ObjectId(cardID)}
+      {userID:new ObjectId(userID.id), cardID:new ObjectId(cardID)}
     ).toArray();
  
     if( existing.length > 0 )
@@ -628,7 +628,6 @@ app.post('/api/getinventory', async (req, res, next) =>
       } );
     }
 
-    // ==========================================================================================
     var query = {};
 
     let orConditions = [];
@@ -654,7 +653,6 @@ app.post('/api/getinventory', async (req, res, next) =>
     {
       _ret.push( buildCardObject(results2[i]) );
     }
-    // ==========================================================================================
   }
   catch(e)
   {
