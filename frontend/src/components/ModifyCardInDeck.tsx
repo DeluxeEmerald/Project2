@@ -12,6 +12,21 @@ function normalizeObjectId(value: any): string {
     return asString === '[object Object]' ? '' : asString;
 }
 
+async function parseJsonResponse(response: Response): Promise<any> {
+    const contentType = response.headers.get('content-type') || '';
+    const raw = await response.text();
+
+    if (!response.ok) {
+        throw new Error(`Request failed (${response.status}).`);
+    }
+
+    if (!contentType.includes('application/json')) {
+        throw new Error('API returned non-JSON response. Check VITE_API_BASE_URL or server /api routing.');
+    }
+
+    return JSON.parse(raw);
+}
+
 function AddedCardToDeck() {
 
     const location = useLocation();
@@ -41,9 +56,7 @@ function AddedCardToDeck() {
             {method:'POST',body:js2,headers:{'Content-Type':
             'application/json'}});
             
-            
-            let txt = await response.text();
-            let res = JSON.parse(txt);
+            let res = await parseJsonResponse(response);
             if(res.error && res.error.length > 0){
                 return res.error;
             }
@@ -72,9 +85,7 @@ function AddedCardToDeck() {
             {method:'POST',body:js2,headers:{'Content-Type':
             'application/json'}});
             
-            
-            let txt = await response.text();
-            let res = JSON.parse(txt);
+            let res = await parseJsonResponse(response);
             if(res.error && res.error.length > 0){
                 return res.error;
             }
@@ -101,8 +112,7 @@ function AddedCardToDeck() {
                 {method:'POST',body:js,headers:{'Content-Type':
                 'application/json'}});
                 
-                let txt = await response.text();
-                let res = JSON.parse(txt);
+                let res = await parseJsonResponse(response);
                 if(res.error && res.error.length > 0){
                     setMessage(res.error);
                 }

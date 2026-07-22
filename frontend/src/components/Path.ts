@@ -6,6 +6,11 @@ export function buildPath(route: string): string
     return `${envBaseUrl.replace(/\/$/, '')}/${route}`;
   }
 
-  const host = window.location.hostname || 'localhost';
-  return `http://${host}:5000/${route}`;
+  if (import.meta.env.DEV)
+  {
+    const host = window.location.hostname || 'localhost';
+    return `http://${host}:5000/${route}`;
+  }
+
+  return `${window.location.origin}/${route}`;
 }
