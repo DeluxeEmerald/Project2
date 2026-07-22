@@ -617,38 +617,10 @@ app.post('/api/getinventory', async (req, res, next) =>
     {
       _ret.push( {
         inventoryId: results[i]._id,
-        cardId:      results[i].card._id,
-        name:        results[i].card.name,
+        total:       results[i].total,
         CardName:    results[i].CardName,
-        imageUrl:    results[i].card.imageUrl,
-        total:       results[i].total
+        ...buildCardObject(results[i].card)
       } );
-    }
-
-    var query = {};
-
-    let orConditions = [];
-
-    _ret.forEach((element) => {
-      if (element.cardId !== '') {
-        var _search = element.cardId;
-
-        if (ObjectId.isValid(_search)) {
-          orConditions.push({ _id: new ObjectId(_search) });
-        }
-      }
-    });
-
-    if (orConditions.length > 0) {
-      query.$or = orConditions;
-    }
-    _ret = [];
-
-    const results2 = await db.collection('MTGSET').find(query).toArray();
-
-    for( var i=0; i<results2.length; i++ )
-    {
-      _ret.push( buildCardObject(results2[i]) );
     }
   }
   catch(e)
