@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { buildPath } from './Path';
+import { parseApiJson } from './apiResponse';
 
 function ResetPassword() {
     const [searchParams] = useSearchParams();
@@ -35,7 +36,7 @@ function ResetPassword() {
                     return;
                 }
 
-                const res = JSON.parse(await response.text());
+                const res = await parseApiJson(response);
 
                 if (res.error && res.error.length > 0) {
                     setStatus(res.error);

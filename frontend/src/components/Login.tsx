@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { buildPath} from './Path';
+import { parseApiJson } from './apiResponse';
 import { storeToken, storeUserID } from '../tokenStorage';
 import { jwtDecode } from 'jwt-decode';
 import type { JwtPayload } from 'jwt-decode';
@@ -34,7 +35,7 @@ function Login()
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
             
-            var res = JSON.parse(await response.text());
+            var res = await parseApiJson(response);
             
             if( res.error && res.error.length > 0 )
             {

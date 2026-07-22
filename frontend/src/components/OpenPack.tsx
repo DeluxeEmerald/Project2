@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { buildPath } from './Path';
+import { parseApiJson } from './apiResponse';
 import packImage from '../assets/pack.png';
 import { useNavigate } from 'react-router-dom';
 
@@ -55,8 +56,7 @@ function OpenPack() {
                 headers: { 'Content-Type': 'application/json' },
             });
 
-            const txt = await response.text();
-            const res = JSON.parse(txt);
+            const res = await parseApiJson(response);
 
             if (res.error && res.error.length > 0) {
                 console.log(res.error);
@@ -124,8 +124,7 @@ function OpenPack() {
                 headers: { 'Content-Type': 'application/json' },
             });
 
-            const txt = await response.text();
-            const res = JSON.parse(txt);
+            const res = await parseApiJson(response);
             if (res.error && res.error.length > 0) {
                 setMessage(res.error);
                 return;

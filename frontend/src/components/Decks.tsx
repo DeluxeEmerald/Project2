@@ -3,6 +3,7 @@ import { buildPath} from './Path';
 import { retrieveToken, storeToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
 import cardStack from '../assets/cardStack.png';
+import { parseApiJson } from './apiResponse';
 
 interface DeckItem {
     id?: string;
@@ -61,8 +62,7 @@ function Decks()
                 headers: { 'Content-Type': 'application/json' },
             });
 
-            const txt = await response.text();
-            const res = JSON.parse(txt);
+            const res = await parseApiJson(response);
             if (res.error && res.error.length > 0) {
                 setMessage(res.error);
                 return;
@@ -110,8 +110,7 @@ function Decks()
                 headers: { 'Content-Type': 'application/json' },
             });
 
-            const txt = await response.text();
-            const res = JSON.parse(txt);
+            const res = await parseApiJson(response);
 
             if (res.error && res.error.length > 0) {
                 setMessage(res.error);
@@ -143,8 +142,7 @@ function Decks()
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
             
-            let txt = await response.text();
-            let res = JSON.parse(txt);
+            let res = await parseApiJson(response);
             if(res.error && res.error.length > 0){
                 setMessage(res.error);
             }

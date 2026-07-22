@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { retrieveToken, retrieveUserID, storeToken } from '../tokenStorage';
 import { buildPath } from './Path';
+import { parseApiJson } from './apiResponse';
 import { useRef, useState } from 'react';
 import cardStack from '../assets/cardStack.png';
 
@@ -81,8 +82,7 @@ function CardDetails() {
                 {method:'POST',body:js,headers:{'Content-Type':
                 'application/json'}});
                 
-                let txt = await response.text();
-                let res = JSON.parse(txt);
+                let res = await parseApiJson(response);
                 if(res.error && res.error.length > 0){
                     setMessage(res.error);
                 }
@@ -119,8 +119,7 @@ function CardDetails() {
                 {method:'POST',body:js,headers:{'Content-Type':
                 'application/json'}});
                 
-                let txt = await response.text();
-                let res = JSON.parse(txt);
+                let res = await parseApiJson(response);
                 if(res.error && res.error.length > 0){
                     setMessage(res.error);
                 }

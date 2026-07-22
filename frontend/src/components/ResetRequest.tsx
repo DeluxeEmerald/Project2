@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { buildPath } from './Path';
 import { useNavigate } from 'react-router-dom';
+import { parseApiJson } from './apiResponse';
 
 function RequestReset() {
   const [message, setMessage] = useState('');
@@ -23,7 +24,7 @@ function RequestReset() {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      const res = JSON.parse(await response.text());
+      const res = await parseApiJson(response);
       if (res.error && res.error.length > 0) {
         setMessage(res.error);
       } else {

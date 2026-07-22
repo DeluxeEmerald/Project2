@@ -2,6 +2,7 @@ import {useEffect, useMemo, useState} from 'react';
 import { buildPath} from './Path';
 import { retrieveToken, retrieveUserID, storeToken } from '../tokenStorage';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { parseApiJson } from './apiResponse';
 
 interface DeckData {
     id?: string;
@@ -162,8 +163,7 @@ function DeckDetails() {
             {method:'POST',body:JSON.stringify(obj),headers:{'Content-Type':
             'application/json'}});
 
-            let txt = await response.text();
-            let res = JSON.parse(txt);
+            let res = await parseApiJson(response);
             if(res.error && res.error.length > 0){
                 setMessage(res.error);
             }
@@ -205,8 +205,7 @@ function DeckDetails() {
                     headers: { 'Content-Type': 'application/json' },
                 });
 
-                const txt = await response.text();
-                const res = JSON.parse(txt);
+                const res = await parseApiJson(response);
                 if (res.error && res.error.length > 0) {
                     throw new Error(res.error);
                 }
@@ -257,8 +256,7 @@ function DeckDetails() {
                             headers: { 'Content-Type': 'application/json' },
                         });
 
-                        const txt = await response.text();
-                        const res = JSON.parse(txt);
+                        const res = await parseApiJson(response);
                         if (res.error && res.error.length > 0) {
                             throw new Error(res.error);
                         }

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { retrieveToken } from '../tokenStorage';
 import { buildPath } from "./Path";
+import { parseApiJson } from './apiResponse';
 import { useState } from "react";
 
 function RemoveDeck({deckId} : {deckId : string})
@@ -20,7 +21,7 @@ function RemoveDeck({deckId} : {deckId : string})
                     {method:'POST',body:js,headers:{'Content-Type':
                     'application/json'}});
                     
-                    var res = JSON.parse(await response.text());
+                    var res = await parseApiJson(response);
                     
                     if( res.error && res.error.length > 0 )
                     {

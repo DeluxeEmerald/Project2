@@ -2,6 +2,7 @@ import {useState, useRef, useEffect} from 'react';
 import { buildPath } from './Path';
 import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
+import { parseApiJson } from './apiResponse';
 
 const Inventory = ({ onCardClick, inventoryOnly }: {
     onCardClick?: (card: any) => void;
@@ -34,8 +35,7 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
         const response = await fetch(buildPath('api/getinventory'),
             {method:'POST',body:JSON.stringify(obj),headers:{'Content-Type':'application/json'}});
 
-        const txt = await response.text();
-        const res = JSON.parse(txt);
+        const res = await parseApiJson(response);
 
         if(res.error && res.error.length > 0){
             throw new Error(res.error);
@@ -91,8 +91,7 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
                 'application/json'}});
             }
             
-            let txt = await response.text();
-            let res = JSON.parse(txt);
+            let res = await parseApiJson(response);
             if(res.error && res.error.length > 0){
                 setMessage(res.error);
             }

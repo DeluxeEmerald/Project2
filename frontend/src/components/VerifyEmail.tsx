@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { buildPath } from './Path';
+import { parseApiJson } from './apiResponse';
 
 function VerifyEmail() {
     const [searchParams] = useSearchParams();
@@ -24,8 +25,7 @@ function VerifyEmail() {
                     headers: { 'Content-Type': 'application/json' },
                 });
 
-                const txt = await response.text();
-                const res = JSON.parse(txt);
+                const res = await parseApiJson(response);
 
                 if (res.error && res.error.length > 0) {
                     setMessage(res.error);

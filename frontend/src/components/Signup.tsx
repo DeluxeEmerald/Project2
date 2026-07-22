@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { buildPath } from './Path';
+import { parseApiJson } from './apiResponse';
 
 function Signup() {
     const [errors, setErrors] = useState<string[]>([]);
@@ -74,7 +75,7 @@ function Signup() {
                     headers: { 'Content-Type': 'application/json' },
                 });
 
-                const res = JSON.parse(await response.text());
+                const res = await parseApiJson(response);
 
                 if (res.error && res.error.length > 0) {
                     setMessage(res.error);
