@@ -1,15 +1,13 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { retrieveToken, retrieveUserID, storeToken } from '../tokenStorage';
 import { buildPath } from './Path';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 function CardDetails() {
     const location = useLocation();
     const navigate = useNavigate();
     const card = location.state?.card;
 
-    const [message,setMessage] = useState('');
-    const [searchResults,setResults] = useState('');
     const toAddOrRemove = useRef(false); // true = add, false = remove
 
     function toModifyCard(deck: any) {
@@ -55,7 +53,7 @@ function CardDetails() {
                 let txt = await response.text();
                 let res = JSON.parse(txt);
                 if(res.error && res.error.length > 0){
-                    setMessage(res.error);
+                    console.log(res.error);
                 }
                 else{
                     storeToken(res.jwtToken);
@@ -73,7 +71,7 @@ function CardDetails() {
             }
             catch(error:any)
             {
-                setResults(error.toString());
+                console.log(error.toString());
             }
         };
 
@@ -92,7 +90,7 @@ function CardDetails() {
                 let txt = await response.text();
                 let res = JSON.parse(txt);
                 if(res.error && res.error.length > 0){
-                    setMessage(res.error);
+                    console.log(res.error);
                 }
                 else{
                     storeToken(res.jwtToken);
@@ -110,7 +108,7 @@ function CardDetails() {
             }
             catch(error:any)
             {
-                setResults(error.toString());
+                console.log(error.toString());
             }
         };
 

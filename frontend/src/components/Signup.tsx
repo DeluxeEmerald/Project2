@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { buildPath} from './Path';
 
 function Signup(){
-    const [errors, setErrors] = useState([]);
+    const [errors, setErrors] = useState([] as String[]);
     const [message,setMessage] = useState('');
     const navigate = useNavigate();
 
@@ -12,10 +12,10 @@ function Signup(){
     }
 
     function validatePawssword(){
-        const password = document.getElementById("loginPassword")?.value || '';
-        const email = document.getElementById("email")?.value || '';
-        const firstName = document.getElementById("firstName")?.value || '';
-        const lastName = document.getElementById("lastName")?.value || '';
+        const password = (document.getElementById("loginPassword") as HTMLInputElement).value || '';
+        const email = (document.getElementById("email") as HTMLInputElement).value || '';
+        const firstName = (document.getElementById("firstName") as HTMLInputElement).value || '';
+        const lastName = (document.getElementById("lastName") as HTMLInputElement).value || '';
         const minLength = 8;
         const upperCase = /[A-Z]/;
         const specialCharacters = /[!@#$%^&*(),.?":{}|<>_\-+=[\];'~`]/g;
@@ -56,9 +56,9 @@ function Signup(){
         const validPassword = validatePawssword();
 
         if (validPassword){
-            const loginName = document.getElementById("firstName")?.value +" "+ document.getElementById("lastName")?.value;
-            const password = document.getElementById("loginPassword")?.value || '';
-            const email = document.getElementById("email")?.value || '';
+            const loginName = (document.getElementById("firstName") as HTMLInputElement).value +" "+ (document.getElementById("lastName") as HTMLInputElement).value;
+            const password = (document.getElementById("loginPassword") as HTMLInputElement).value || '';
+            const email = (document.getElementById("email") as HTMLInputElement).value || '';
 
             var obj = {name:loginName, password:password, email: email};
             var js = JSON.stringify(obj);

@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef} from 'react';
 import { buildPath} from './Path';
 import { retrieveToken, storeToken, retrieveUserID } from '../tokenStorage';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -12,8 +12,6 @@ function DeckDetails() {
     const deck = location.state?.deck;
     const cardIDs = deck.cards;
 
-    const [searchResults,setResults] = useState('');
-    const [message,setMessage] = useState('');
     const hasLoaded = useRef(false);
 
 
@@ -62,7 +60,7 @@ function DeckDetails() {
             let txt = await response.text();
             let res = JSON.parse(txt);
             if(res.error && res.error.length > 0){
-                setMessage(res.error);
+                console.log(res.error);
             }
             else{
                 storeToken(res.jwtToken);
@@ -92,7 +90,7 @@ function DeckDetails() {
         }
         catch(error:any)
         {
-            setResults(error.toString());
+            console.log(error.toString());
         }
     };
 

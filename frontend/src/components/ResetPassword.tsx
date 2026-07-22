@@ -6,7 +6,7 @@ function ResetPassword() {
   const [searchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
-  const [errors, setErrors] = useState([]);
+  const [errors, setErrors] = useState([] as String[]);
   const navigate = useNavigate();
 
   async function submitPassword()  : Promise<void>{
@@ -21,7 +21,7 @@ function ResetPassword() {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: js })
 
             if(!response.ok) {
-                setStatus(response.status);
+                setStatus(response.status.toString());
                 return;
             }
 

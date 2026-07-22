@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { buildPath} from './Path';
-import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
+import { retrieveToken, storeToken, retrieveUserID } from '../tokenStorage';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function AddedCardToDeck() {
@@ -101,7 +101,7 @@ function AddedCardToDeck() {
     
                 let results = res.results;
                 
-                const container = document.getElementById("decksContainer");
+                document.getElementById("decksContainer");
     
                 results.forEach((element: any) => {
                     setNewDeck(element);
@@ -114,15 +114,6 @@ function AddedCardToDeck() {
                 console.log(error.toString());
             }
         };
-
-    function getExitButtons() {
-        return (
-            <div id='exitButtons'>
-                <button onClick={() => navigate("/deckdetails/${deck.id}", { state: { deck:newDeck, card:null } })} className='bg-main w-32'>Go to Deck</button>
-                <button onClick={() => navigate("/card/:cardId", {state: { card:card }})} className='bg-main w-32'>Go Back to Card</button>
-            </div>
-        );
-    }
 
     async function awaitUpdate() {
         setMessage("Loading...");

@@ -1,13 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
+import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
 function OpenPack()
 {
 
-    let _ud : any = localStorage.getItem('user_data');
-    let ud = JSON.parse( _ud );
-    const [message,setMessage] = useState('');
-    const [searchResults,setResults] = useState('');
     const [showPack, setShowPack] = useState(true);
     const [showButtons, setShowButtons] = useState(false);
     const [cardsObtained, setCards] = useState<cardObject[]>([]);
@@ -69,11 +65,11 @@ function OpenPack()
             let txt = await response.text();
             let res = JSON.parse(txt);
             if(res.error && res.error.length > 0){
-                setMessage(res.error);
+                console.log(res.error);
             }
             else{
                 storeToken(res.jwtToken);
-                setResults(res.results);
+                console.log(res.results);
             }
             let _results = res.results;
             
@@ -98,7 +94,7 @@ function OpenPack()
         }
         catch (error: any) {
             console.log("Error");
-            setResults(error.toString());
+            console.log(error.toString());
             return [];
         }
     }
@@ -118,7 +114,7 @@ function OpenPack()
             let res = JSON.parse(txt);
 
             if(res.error && res.error.length > 0){
-                setMessage(res.error);
+                console.log(res.error);
             }
             else{
                 storeToken(res.jwtToken);
