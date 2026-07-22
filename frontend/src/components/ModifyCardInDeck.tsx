@@ -1,7 +1,16 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { buildPath} from './Path';
-import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
+import { retrieveToken, storeToken, retrieveUserID } from '../tokenStorage';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+function normalizeObjectId(value: any): string {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object' && typeof value.$oid === 'string') return value.$oid;
+    if (typeof value.toHexString === 'function') return value.toHexString();
+    const asString = String(value);
+    return asString === '[object Object]' ? '' : asString;
+}
 
 function AddedCardToDeck() {
 
@@ -19,8 +28,9 @@ function AddedCardToDeck() {
     const hasAdded = useRef(false);
 
     async function addToDeck() : Promise<string> {
-        const deckID = deck._id ? deck._id : deck.id;
-        let obj2 = {jwtToken: retrieveToken(), deckId: deckID, cardId: card.id, quantity:"1"};
+        const deckID = normalizeObjectId(deck._id ? deck._id : deck.id);
+        const cardID = normalizeObjectId(card.id);
+        let obj2 = {jwtToken: retrieveToken(), deckId: deckID, cardId: cardID, quantity:"1"};
         let js2 = JSON.stringify(obj2);
         
         try
@@ -49,8 +59,9 @@ function AddedCardToDeck() {
     }
 
     async function removeFromDeck() : Promise<string> {
-        const deckID = deck._id ? deck._id : deck.id;
-        let obj2 = {jwtToken: retrieveToken(), deckId: deckID, cardId: card.id, quantity:"1"};
+        const deckID = normalizeObjectId(deck._id ? deck._id : deck.id);
+        const cardID = normalizeObjectId(card.id);
+        let obj2 = {jwtToken: retrieveToken(), deckId: deckID, cardId: cardID, quantity:"1"};
         let js2 = JSON.stringify(obj2);
         
         try
@@ -81,7 +92,7 @@ function AddedCardToDeck() {
     async function getDecks() : Promise<void>
         {
             const deckID = deck._id ? deck._id : deck.id;
-            let obj = {jwtToken: retrieveToken(), userId: JSON.parse(retrieveUserID()).id, search:deckID};
+            let obj = {jwtToken: retrieveToken(), userId: JSON.parse(retrieveUserID()).id, search:normalizeObjectId(deckID)};
             let js = JSON.stringify(obj);
             
             try
@@ -101,8 +112,6 @@ function AddedCardToDeck() {
     
                 let results = res.results;
                 
-                const container = document.getElementById("decksContainer");
-    
                 results.forEach((element: any) => {
                     setNewDeck(element);
                 });
@@ -115,15 +124,6 @@ function AddedCardToDeck() {
             }
         };
 
-    function getExitButtons() {
-        return (
-            <div id='exitButtons'>
-                <button onClick={() => navigate("/deckdetails/${deck.id}", { state: { deck:newDeck, card:null } })} className='bg-main w-32'>Go to Deck</button>
-                <button onClick={() => navigate("/card/:cardId", {state: { card:card }})} className='bg-main w-32'>Go Back to Card</button>
-            </div>
-        );
-    }
-
     async function awaitUpdate() {
         setMessage("Loading...");
         console.log(deck);
@@ -131,7 +131,7 @@ function AddedCardToDeck() {
             const error = await addToDeck();
             await getDecks();
             if (error.length > 0)
-                setMessage(`${card.name} is already in ${deck.deckName}!`);
+                setMessage(error);
             else
                 setMessage(`${card.name} has been added to ${deck.deckName}.`);
         }
@@ -153,10 +153,16 @@ function AddedCardToDeck() {
         awaitUpdate();
     }, []);
 
-    const ret = (<div className='flex flex-col items-center gap-4 text-black p-8 font-grover' id="cardUIDiv">
-            {message}
-            {isFinishedLoading && (<div><button onClick={() => navigate(`/card/:cardId`, {state: { card:card }})} className='bg-main w-32'>Go Back to Card</button><br></br><br></br>
-            <button onClick={() => navigate(`/deckdetails/${deck.id}`, { state: { deck:newDeck, card:null } })} className='bg-main w-32'>Go to Deck</button></div>)}
+    const ret = (<div className='card-update-shell text-black' id="cardUIDiv">
+            <div className='card-update-panel'>
+                <p className='brand-mark'>Deck Update</p>
+                <h1 className='card-update-title'>{addrm ? 'Card added to deck' : 'Card removed from deck'}</h1>
+                <p className='card-update-copy'>{message}</p>
+                {isFinishedLoading && (<div className='card-update-actions'>
+                    <button onClick={() => navigate(`/card/${card.id}`, {state: { card:card }})} className='secondary-button'>Go Back to Card</button>
+                    <button onClick={() => navigate(`/deckdetails/${deck.id}`, { state: { deck:newDeck, card:null } })} className='primary-button'>Go to Deck</button>
+                </div>)}
+            </div>
         </div>);
 
     return ret;

@@ -977,6 +977,19 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
  
   var error = '';
   const { jwtToken, deckId, cardId, quantity } = req.body; // QUANTITY DOES NOTHING
+
+  function normalizeObjectId(value)
+  {
+    if( !value ) return '';
+    if( typeof value === 'string' ) return value;
+    if( typeof value === 'object' && typeof value.$oid === 'string' ) return value.$oid;
+    if( value.toHexString ) return value.toHexString();
+    var asString = String(value);
+    return asString === '[object Object]' ? '' : asString;
+  }
+
+  const normalizedDeckId = normalizeObjectId(deckId);
+  const normalizedCardId = normalizeObjectId(cardId);
  
   try
   {
@@ -994,37 +1007,65 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
  
   try
   {
-    const db = client.db('MTG');
- 
-    const deck = await db.collection('Decks').findOne({ _id: new ObjectId(deckId) });
- 
-    if( !deck )
+    if( !ObjectId.isValid(normalizedDeckId) || !ObjectId.isValid(normalizedCardId) )
     {
-      error = 'Deck not found';
+      error = 'Invalid deck or card id';
     }
-    else
+
+    if( error.length === 0 )
     {
-      var existingCard = false;
-      deck.cards.forEach(async (element) => {
-        // console.log('e: '+element);
-        // console.log('c: '+cardId);
-        existingCard = ((String(element) == String(cardId)) && (existingCard == false));
-      });
- 
-      if( existingCard )
+      const db = client.db('MTG');
+    
+      const deck = await db.collection('Decks').findOne({ _id: new ObjectId(normalizedDeckId) });
+    
+      if( !deck )
       {
-        // await db.collection('Decks').updateOne(
-        //   { _id: new ObjectId(deckId), "cards.cardId": new ObjectId(cardId) }//,
-        //   // { $inc: { "cards.$.quantity": quantity } }
-        // );
-        error = 'The card is already in this deck!';
+        error = 'Deck not found';
       }
       else
       {
-        await db.collection('Decks').updateOne(
-          { _id: new ObjectId(deckId) },
-          { $push: { cards: new ObjectId(cardId) /*{ cardId: , quantity: quantity } */ } }
-        );
+        const ownerUserIdString = normalizeObjectId(deck.userId);
+        const ownerUserId = ObjectId.isValid(ownerUserIdString) ? new ObjectId(ownerUserIdString) : null;
+
+        if( !ownerUserId )
+        {
+          error = 'Deck owner is invalid';
+        }
+        else
+        {
+          const inventoryEntry = await db.collection('Inventory').findOne({
+            userID: ownerUserId,
+            cardID: new ObjectId(normalizedCardId)
+          });
+
+          if( !inventoryEntry )
+          {
+            error = 'You can only add cards that are in your inventory.';
+          }
+
+          const deckCards = Array.isArray(deck.cards) ? deck.cards : [];
+          const existingCard = deckCards.some((element) => normalizeObjectId(element) === normalizedCardId);
+    
+          if( error.length > 0 )
+          {
+            // Restriction already set.
+          }
+          else if( existingCard )
+          {
+            // await db.collection('Decks').updateOne(
+            //   { _id: new ObjectId(deckId), "cards.cardId": new ObjectId(cardId) }//,
+            //   // { $inc: { "cards.$.quantity": quantity } }
+            // );
+            error = 'The card is already in this deck!';
+          }
+          else
+          {
+            await db.collection('Decks').updateOne(
+              { _id: new ObjectId(normalizedDeckId) },
+              { $push: { cards: new ObjectId(normalizedCardId) /*{ cardId: , quantity: quantity } */ } }
+            );
+          }
+        }
       }
     }
   }

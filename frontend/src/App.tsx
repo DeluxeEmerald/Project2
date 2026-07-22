@@ -4,6 +4,7 @@ import './App.css';
 
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import VerifyEmail from './components/VerifyEmail';
 
 import LoggedInTopBar from './pages/MainContent';
 import Packs from './components/Packs';
@@ -22,6 +23,7 @@ return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/confirm" element={<SignUpSubmission />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/signup" element={<SignupPage />} />
 
       <Route element={<LoggedInTopBar />}>

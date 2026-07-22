@@ -1,167 +1,80 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import { buildPath} from './Path';
-import { retrieveToken, storeToken, retrieveUserID, storeUserID } from '../tokenStorage';
+import { retrieveToken, retrieveUserID, storeToken } from '../tokenStorage';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Inventory from './Inventory';
+
+interface DeckData {
+    id?: string;
+    _id?: string;
+    deckName?: string;
+    name?: string;
+    cards?: string[];
+}
+
+interface CardData {
+    id: string;
+    name: string;
+    imageUrl: string;
+    rarity?: string;
+    cmc?: number;
+    colors?: string[];
+    typeLine?: string;
+}
+
+type SortOption = 'none' | 'alphabet' | 'manaCost' | 'rarity' | 'color';
+
+const TYPE_OPTIONS = ['creature', 'land', 'instant', 'sorcery', 'artifact', 'enchantment', 'planeswalker'];
+const RARITY_OPTIONS = ['common', 'uncommon', 'rare', 'mythic'];
+
+function normalizeObjectId(value: any): string {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object' && typeof value.$oid === 'string') return value.$oid;
+    if (typeof value.toHexString === 'function') return value.toHexString();
+    const asString = String(value);
+    return asString === '[object Object]' ? '' : asString;
+}
+
+function normalizeCard(card: any): CardData {
+    return {
+        ...card,
+        id: normalizeObjectId(card.id ?? card.cardId ?? card._id),
+        name: card.name ?? 'Unknown card',
+        imageUrl: card.imageUrl ?? '',
+    };
+}
 
 
 function DeckDetails() {
     const location = useLocation();
     const navigate = useNavigate();
-    const deck = location.state?.deck;
-    // const card = location.state?.card;
-    const cardIDs = deck.cards;
+    const deck = location.state?.deck as DeckData | undefined;
+    const deckId = normalizeObjectId(deck?.id ?? deck?._id);
+    const deckTitle = deck?.deckName ?? deck?.name ?? 'Deck';
 
-    const [searchResults,setResults] = useState('');
     const [message,setMessage] = useState('');
-    const [search,setSearchValue] = React.useState('');
-    const hasLoaded = useRef(false);
+    const [search,setSearchValue] = useState('');
+    const [deckCards, setDeckCards] = useState<CardData[]>([]);
+    const [searchResults, setSearchResults] = useState<CardData[]>([]);
+    const [isLoadingDeckCards, setIsLoadingDeckCards] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showSort, setShowSort] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+    const [sortOption, setSortOption] = useState<SortOption>('none');
+    const [selectedTypes, setSelectedTypes] = useState<Record<string, boolean>>({});
+    const [selectedRarities, setSelectedRarities] = useState<Record<string, boolean>>({});
+    const [inventoryCardIds, setInventoryCardIds] = useState<Set<string>>(new Set());
+    const [inventoryOnly, setInventoryOnly] = useState(false);
 
-    const isTrueSortRef = useRef(false);
-    const isFilterOptionsRef = useRef(false);
-
-    function ImageButtonCardAdd(imageSrc:string, cardName:string) : string {
-    return `
-        <button class="h-60 w-40 p-0 border-0 overflow-hidden rounded-[23px]" >
-        <img src="${imageSrc}" alt="${cardName}" class="h-full w-full object-contain" />
-        </button>
-        `;
+    function toCardAdd(card: CardData) {
+        navigate(`/modifycard/${deckId}`, { state: { deck: deck, card: card, addrm: true } });
     }
 
-
-    async function searchCardAdd(e:any) : Promise<void>
-    {
-        e.preventDefault();
-        let obj = {jwtToken: retrieveToken(), search: search};
-        let obj2 = {jwtToken: retrieveToken(), userID: retrieveUserID(), search: search};
-        let js = JSON.stringify(obj);
-        let js2 = JSON.stringify(obj2);
-        
-        try
-        {
-            const selectedInventory = document.getElementById("owned") as HTMLInputElement | null;
-            let response = null;
-
-            if(selectedInventory?.checked){
-                response = await fetch(buildPath('api/getinventory'),
-                {method:'POST',body:js2,headers:{'Content-Type':
-                'application/json'}});
-            }
-            else{
-                response = await fetch(buildPath('api/searchcards'),
-                {method:'POST',body:js,headers:{'Content-Type':
-                'application/json'}});
-            }
-            
-            let txt = await response.text();
-            let res = JSON.parse(txt);
-            if(res.error && res.error.length > 0){
-                setMessage(res.error);
-            }
-            else{
-                storeToken(res.jwtToken);
-            }
-
-            let _results = res.results;
-
-            _results = _results.map((element: any) => ({
-                ...element,
-                id: element.id ?? element.cardId
-            }));
-
-            _results.sort(getSortComparator());
-            
-            const container = document.getElementById('cardList');
-            if (container) {
-                container.innerHTML = '';
-
-                _results.forEach((element: any) => {
-                    if(checkFilter(element.typeLine, element.rarity)){
-                        const cardAdd = document.createElement('div');
-                        cardAdd.className = 'card';
-                        cardAdd.innerHTML = ImageButtonCardAdd(element.imageUrl, element.name);
-
-                        cardAdd.querySelector('button')?.addEventListener('click', () => {
-                            navigate(`/modifycard/${deck._id}`, { state: { deck:deck, card:element, addrm:true } });
-                        });
-
-                        container.appendChild(cardAdd);
-                    }
-                });
-            }
-        }
-        catch(error:any)
-        {
-            setResults(error.toString());
-        }
-    };
-
-    function handleSearchTextChange( e: any ) : void{
-        setSearchValue( e.target.value );
+    function toCardRemoval(card: CardData) {
+        navigate(`/modifycard/${deckId}`, { state: { deck: deck, card: card, addrm: false } });
     }
 
-    function checkFilter(typeLine: string,rarity: string): boolean{
-        const typeId = ['creature', 'land', 'instant', 'sorcery', 'artifact', 'enchantment', 'planeswalker']
-        const rarityId = ['common', 'uncommon', 'rare', 'mythic']
-
-        
-        const selectedTypes = typeId.filter(id =>
-            (document.getElementById(id) as HTMLInputElement)?.checked
-        );
-        const selectedRarities = rarityId.filter(id =>
-            (document.getElementById(id) as HTMLInputElement)?.checked
-        );
-
-        const typeMatch = selectedTypes.length === 0 ||
-            selectedTypes.some(x => typeLine.toLowerCase().includes(x));
-
-        const rarityMatch = selectedRarities.length === 0 ||
-            selectedRarities.includes(rarity.toLowerCase());
-
-        return typeMatch && rarityMatch;
-    }
-
-    function showSort(){
-        const container = document.getElementById('sortOption');
-        if (!container) return;
-
-        if(!isTrueSortRef.current){
-            if (!container.hasChildNodes()){
-                container.className ='flex justify-center items-center';
-
-                const list = document.createElement('div');
-                list.className = 'flex flex-col gap-2 w-40 p-3 rounded-md';
-                list.innerHTML = `
-                <div class="flex items-center gap-1">
-                    <input type="radio" id="alphabet" name="sortOption" class="w-4 h-4">
-                    <label for="alphabet" class="text-sm whitespace-nowrap">Alphabet</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="radio" id="manaCost" name="sortOption" class="w-4 h-4">
-                    <label for="manaCost" class="text-sm whitespace-nowrap">Mana Cost</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="radio" id="rarity" name="sortOption" class="w-4 h-4">
-                    <label for="rarity" class="text-sm whitespace-nowrap">Rarity</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="radio" id="color" name="sortOption" class="w-4 h-4">
-                    <label for="color" class="text-sm whitespace-nowrap">Color</label>
-                </div>
-                `;
-                container.appendChild(list);
-            }
-            container.style.display = 'flex';
-            isTrueSortRef.current = true;
-        }
-        else{
-            container.style.display = 'none';
-            isTrueSortRef.current = false;
-        }
-    }
-        
-
-    function getSortComparator(): (a: any, b: any) => number {
+    function getSortComparator(): (a: CardData, b: CardData) => number {
         const rarityOrder: Record<string, number> = {
             common: 0, uncommon: 1, rare: 2, mythic: 3
         };
@@ -169,20 +82,20 @@ function DeckDetails() {
             W: 0, U: 1, B: 2, R: 3, G: 4
         };
 
-        if ((document.getElementById('alphabet') as HTMLInputElement)?.checked) {
+        if (sortOption === 'alphabet') {
             return (a, b) => a.name.localeCompare(b.name);
         }
 
-        if ((document.getElementById('manaCost') as HTMLInputElement)?.checked) {
-            return (a, b) => a.cmc - b.cmc;
+        if (sortOption === 'manaCost') {
+            return (a, b) => (a.cmc ?? 0) - (b.cmc ?? 0);
         }
 
-        if ((document.getElementById('rarity') as HTMLInputElement)?.checked) {
-            return (a, b) => (rarityOrder[a.rarity.toLowerCase()] ?? 99) -
-                            (rarityOrder[b.rarity.toLowerCase()] ?? 99);
+        if (sortOption === 'rarity') {
+            return (a, b) => (rarityOrder[(a.rarity ?? '').toLowerCase()] ?? 99) -
+                            (rarityOrder[(b.rarity ?? '').toLowerCase()] ?? 99);
         }
 
-        if ((document.getElementById('color') as HTMLInputElement)?.checked) {
+        if (sortOption === 'color') {
             return (a, b) => {
                 const aColor = a.colors?.[0] ? colorOrder[a.colors[0]] : 99;
                 const bColor = b.colors?.[0] ? colorOrder[b.colors[0]] : 99;
@@ -193,82 +106,17 @@ function DeckDetails() {
         return () => 0;
     }
 
-    function showFilterOptions(){
-        const container = document.getElementById('filterOption');
-        if (!container) return;
+    function passesFilter(card: CardData): boolean {
+        const activeTypes = TYPE_OPTIONS.filter((option) => selectedTypes[option]);
+        const activeRarities = RARITY_OPTIONS.filter((option) => selectedRarities[option]);
 
-        
-        if(!isFilterOptionsRef.current){
-            if(!container.hasChildNodes()){
-                container.className ='flex justify-center items-center';
+        const typeLine = (card.typeLine ?? '').toLowerCase();
+        const rarity = (card.rarity ?? '').toLowerCase();
 
-                const list = document.createElement('div');
-                list.className = 'grid grid-cols-2 gap-x-4 gap-y-2 w-86 p-3 rounded-md';
-                list.innerHTML = `
-                <p class='col-span-2'>Ownership</p>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="owned" value="owned" class="w-4 h-4">
-                    <label for="owned" class="text-sm">In Inventory</label>
-                </div>
-                <div class="flex items-center gap-1">
-                </div>
-                    <p class='col-span-2 justify-center'>Type</p>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="creature" value="creature" class="w-4 h-4">
-                    <label for="creature" class="text-sm">Creature</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="land" value="land" class="w-4 h-4">
-                    <label for="land" class="text-sm">Land</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="instant" value="instant" class="w-4 h-4">
-                    <label for="instant" class="text-sm">Instant</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="sorcery" value="sorcery" class="w-4 h-4">
-                    <label for="sorcery" class="text-sm">Sorcery</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="artifact" value="aritfact" class="w-4 h-4">
-                    <label for="artifact" class="text-sm">Artifact</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="enchantment" value="enchantment" class="w-4 h-4">
-                    <label for="enchantment" class="text-sm">Enchantment</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="planeswalker" value="planeswalker" class="w-4 h-4">
-                    <label for="planeswalker" class="text-sm">Planeswalker</label>
-                </div>
-                <p class='col-span-2'>Rarity</p>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="common" value="common" class="w-4 h-4">
-                    <label for="common" class="text-sm">Common</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="uncommon" value="uncommon" class="w-4 h-4">
-                    <label for="uncommon" class="text-sm">Uncommon</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="rare" value="rare" class="w-4 h-4">
-                    <label for="rare" class="text-sm">Rare</label>
-                </div>
-                <div class="flex items-center gap-1">
-                    <input type="checkbox" id="mythic" value="mythic" class="w-4 h-4">
-                    <label for="mythic" class="text-sm">Mythic</label>
-                </div>
-                `;
-                container.appendChild(list);
-            }
+        const typeMatch = activeTypes.length === 0 || activeTypes.some((option) => typeLine.includes(option));
+        const rarityMatch = activeRarities.length === 0 || activeRarities.includes(rarity);
 
-            container.style.display = 'flex';
-            isFilterOptionsRef.current = true;
-        }
-        else{
-            container.style.display = 'none';
-            isFilterOptionsRef.current = false;
-        }
+        return typeMatch && rarityMatch;
     }
 
     if (!deck) {
@@ -280,39 +128,41 @@ function DeckDetails() {
         );
     }
 
-    const handleDelete = (card: any) => {
-        const confirmed = window.confirm('Are you sure you want to delete this card?');
-        if (confirmed) {
-            toCardRemoval(card);
+    const sortedFilteredSearchResults = useMemo(() => {
+        return [...searchResults]
+            .filter((card) => passesFilter(card))
+            .filter((card) => !inventoryOnly || inventoryCardIds.has(card.id))
+            .sort(getSortComparator());
+    }, [searchResults, selectedTypes, selectedRarities, sortOption, inventoryOnly, inventoryCardIds]);
+
+    function cardIsInInventory(card: CardData): boolean {
+        return inventoryCardIds.has(card.id);
+    }
+
+    function handleAddCardClick(card: CardData): void {
+        if (!cardIsInInventory(card)) {
+            setMessage('You can only add cards that are in your inventory.');
+            return;
         }
-    };
 
-    function ImageButton(imageSrc:string, cardName:string) : string {
-    return `
-        <button class="h-60 w-40 p-0 border-0 overflow-hidden rounded-[23px]" >
-        <img src="${imageSrc}" alt="${cardName}" class="h-full w-full object-contain" />
-        </button>
-        `;
+        setMessage('');
+        toCardAdd(card);
     }
 
-    function toCardRemoval(card: any) {
-        navigate(`/modifycard/${deck._id}`, { state: { deck:deck, card:card, addrm:false } });
-    }
-
-    async function searchCard(search: string) : Promise<void>
+    async function searchCardAdd(e:any) : Promise<void>
     {
-        let obj2 = {jwtToken: retrieveToken(), userID: retrieveUserID(), search: search};
-        let js2 = JSON.stringify(obj2);
-        
+        e.preventDefault();
+
+        const endpoint = 'api/searchcards';
+        const obj = { jwtToken: retrieveToken(), search: search };
+
         try
         {
-            let response = null;
-
-            response = await fetch(buildPath('api/searchcards'),
-            {method:'POST',body:js2,headers:{'Content-Type':
+            setIsSearching(true);
+            const response = await fetch(buildPath(endpoint),
+            {method:'POST',body:JSON.stringify(obj),headers:{'Content-Type':
             'application/json'}});
-            
-            
+
             let txt = await response.text();
             let res = JSON.parse(txt);
             if(res.error && res.error.length > 0){
@@ -320,92 +170,257 @@ function DeckDetails() {
             }
             else{
                 storeToken(res.jwtToken);
+                setMessage('');
             }
 
-            let _results = res.results;
-
-            _results = _results.map((element: any) => ({
-                ...element,
-                id: element.id ?? element.cardId
-            }));
-
-            const container = document.getElementById('deckCardsList');
-            if (container) {
-                _results.forEach((element: any) => {
-                    const cardAdd = document.createElement('div');
-                    cardAdd.className = 'card';
-                    cardAdd.innerHTML = ImageButton(element.imageUrl, element.name);
-
-                    cardAdd.querySelector('button')?.addEventListener('click', () => {
-                        handleDelete(element);
-                    });
-
-                    container.appendChild(cardAdd);
-                });
-            }
+            const normalized = (res.results || []).map((element: any) => normalizeCard(element));
+            setSearchResults(normalized.filter((card: CardData) => card.id.length > 0));
         }
         catch(error:any)
         {
-            setResults(error.toString());
+            setMessage(error.toString());
+        }
+        finally {
+            setIsSearching(false);
         }
     };
 
-    useEffect(() => {
-    if (hasLoaded.current || !cardIDs) return;
-    hasLoaded.current = true;
-
-    async function loadDeckCards() {
-        const container = document.getElementById('deckCardsList');
-        if (container) container.innerHTML = 'Loading...';
-        // await new Promise(resolve => setTimeout(resolve, 2000));
-        if (container) container.innerHTML = '';
-        cardIDs.forEach((element: string) => {
-            searchCard(element);
-        });
+    function toggleType(option: string) {
+        setSelectedTypes((previous) => ({ ...previous, [option]: !previous[option] }));
     }
-    loadDeckCards();
+
+    function toggleRarity(option: string) {
+        setSelectedRarities((previous) => ({ ...previous, [option]: !previous[option] }));
+    }
+
+    useEffect(() => {
+        let isActive = true;
+
+        async function loadInventoryCardIds() {
+            try {
+                const userId = JSON.parse(retrieveUserID()).id;
+                const payload = { jwtToken: retrieveToken(), userID: userId };
+                const response = await fetch(buildPath('api/getinventory'), {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                const txt = await response.text();
+                const res = JSON.parse(txt);
+                if (res.error && res.error.length > 0) {
+                    throw new Error(res.error);
+                }
+
+                storeToken(res.jwtToken);
+
+                const inventoryIds = new Set<string>(
+                    (res.results || [])
+                        .map((element: any) => normalizeObjectId(element.id ?? element.cardId ?? element._id))
+                        .filter((id: string) => id.length > 0)
+                );
+
+                if (isActive) {
+                    setInventoryCardIds(inventoryIds);
+                }
+            } catch (error:any) {
+                if (isActive) {
+                    setMessage(error.toString());
+                }
+            }
+        }
+
+        void loadInventoryCardIds();
+
+        return () => {
+            isActive = false;
+        };
     }, []);
 
+    useEffect(() => {
+        const cardIDs = (deck.cards || []).map((id) => normalizeObjectId(id)).filter((id) => id.length > 0);
+        if (cardIDs.length === 0) {
+            setDeckCards([]);
+            return;
+        }
+
+        let isActive = true;
+
+        async function loadDeckCards() {
+            try {
+                setIsLoadingDeckCards(true);
+                const loadedCards = await Promise.all(
+                    cardIDs.map(async (cardId) => {
+                        const payload = { jwtToken: retrieveToken(), search: cardId };
+                        const response = await fetch(buildPath('api/searchcards'), {
+                            method: 'POST',
+                            body: JSON.stringify(payload),
+                            headers: { 'Content-Type': 'application/json' },
+                        });
+
+                        const txt = await response.text();
+                        const res = JSON.parse(txt);
+                        if (res.error && res.error.length > 0) {
+                            throw new Error(res.error);
+                        }
+
+                        storeToken(res.jwtToken);
+                        const firstMatch = (res.results || [])[0];
+                        return firstMatch ? normalizeCard(firstMatch) : null;
+                    })
+                );
+
+                if (isActive) {
+                    setDeckCards(loadedCards.filter((card): card is CardData => card !== null));
+                }
+            } catch (error:any) {
+                if (isActive) {
+                    setMessage(error.toString());
+                }
+            } finally {
+                if (isActive) {
+                    setIsLoadingDeckCards(false);
+                }
+            }
+        }
+
+        void loadDeckCards();
+
+        return () => {
+            isActive = false;
+        };
+    }, [deck.cards]);
+
     return (
-        <div className='flex flex-col justify-center text-black'>
-            <div className='rounded-3xl w-full flex flex-col items-center justify-center gap-8 p-6' id="cardUIDiv">
-                <div className='flex flex-col items-center justify-center'>
-                    <div>Click on a card to remove it!</div>
-                    <button className="rounded-2xl w-32 h-16 m-4 border-5 bg-black color text-white" onClick={() => navigate("/decks")}>Go Back</button>
-                    <div className='flex flex-row gap-2'>
-                        <div className='flex flex-col gap-2'>
-                            <h1 className='text-2xl font-bold text-black'>{deck.name}</h1>
-                            <p>Deck Name: {deck.deckName}</p>  
-                            <div id='deckCardsList' className='flex flex-wrap gap-2 justify-center mb-4'></div>
-                        </div>
-                    </div>
+        <div className='deck-detail-shell text-black' id="cardUIDiv">
+            <div className='deck-detail-header'>
+                <div>
+                    <p className='brand-mark'>Deck Details</p>
+                    <h1 className='deck-detail-title'>{deckTitle}</h1>
+                    <p className='deck-detail-copy'>Manage cards already in this deck and search for new cards to add.</p>
                 </div>
-
-                <p className='text-black text-xl'>Add cards to deck</p>
-                    <div>
-                    Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCardAdd(e);}} 
-                    className='bg-white' />
-                    <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"
-                        onClick={searchCardAdd}> Search Card</button>
-                </div>
-
-                <div className='flex flex-col items-center gap-2'>
-                    <div>
-                        <button type="button" id="Sort" className="bg-main hover:bg-accent2 w-32"
-                            onClick={showSort}> Sort</button>   
-                        <button type="button" id="Filter" className="bg-main hover:bg-accent2 w-32"
-                            onClick={showFilterOptions}> Filter</button>
-                    </div>
-
-                    <div className='flex flex-row gap-2'>
-                        <div id='sortOption' className=''></div>   
-                        <div id='filterOption' className=''></div>
-                    </div>
-                </div>
-                    <span id="cardSearchResult">{searchResults}</span>
-                    <span >{message}</span>
-                    <p id="cardList" className='flex flex-wrap gap-2 justify-center mb-4' ></p>
+                <button className='secondary-button' onClick={() => navigate('/decks')}>Back to Decks</button>
             </div>
+
+            <div className='deck-detail-grid'>
+                <section className='deck-detail-panel'>
+                    <div className='deck-detail-panel-head'>
+                        <h2 className='deck-detail-section-title'>Cards in deck</h2>
+                        <span className='deck-detail-pill'>{deckCards.length} cards</span>
+                    </div>
+                    <p className='deck-detail-subtle'>Click a card to remove it from this deck.</p>
+                    {isLoadingDeckCards ? (
+                        <p className='deck-detail-subtle'>Loading deck cards...</p>
+                    ) : (
+                        <div className='deck-detail-cards-grid'>
+                            {deckCards.map((card) => (
+                                <button key={card.id} className='deck-detail-card' type='button' onClick={() => toCardRemoval(card)}>
+                                    <img src={card.imageUrl} alt={card.name} className='deck-detail-card-image' />
+                                    <span className='deck-detail-card-name'>{card.name}</span>
+                                </button>
+                            ))}
+                            {deckCards.length === 0 && <p className='deck-detail-subtle'>No cards found in this deck yet.</p>}
+                        </div>
+                    )}
+                </section>
+
+                <section className='deck-detail-panel'>
+                    <div className='deck-detail-panel-head'>
+                        <h2 className='deck-detail-section-title'>Add cards</h2>
+                        <span className='deck-detail-pill'>{sortedFilteredSearchResults.length} results</span>
+                    </div>
+
+                    <form className='deck-detail-search-row' onSubmit={searchCardAdd}>
+                        <input
+                            type='text'
+                            value={search}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            className='text-input'
+                            placeholder='Search cards by name, type, or id'
+                        />
+                        <button type='submit' className='primary-button' disabled={isSearching}>
+                            {isSearching ? 'Searching...' : 'Search'}
+                        </button>
+                    </form>
+
+                    <div className='deck-detail-control-row'>
+                        <button type='button' className='secondary-button' onClick={() => setShowSort((previous) => !previous)}>Sort</button>
+                        <button type='button' className='secondary-button' onClick={() => setShowFilters((previous) => !previous)}>Filters</button>
+                        <label className='deck-detail-toggle'>
+                            <input type='checkbox' checked={inventoryOnly} onChange={(e) => setInventoryOnly(e.target.checked)} />
+                            Inventory only
+                        </label>
+                        <span className='deck-detail-pill'>Add requires inventory match</span>
+                    </div>
+
+                    {showSort && (
+                        <div className='deck-detail-options-card'>
+                            <p className='deck-detail-options-title'>Sort by</p>
+                            <div className='deck-detail-options-grid'>
+                                <label className='deck-detail-toggle'><input type='radio' name='sortOption' checked={sortOption === 'alphabet'} onChange={() => setSortOption('alphabet')} />Alphabet</label>
+                                <label className='deck-detail-toggle'><input type='radio' name='sortOption' checked={sortOption === 'manaCost'} onChange={() => setSortOption('manaCost')} />Mana Cost</label>
+                                <label className='deck-detail-toggle'><input type='radio' name='sortOption' checked={sortOption === 'rarity'} onChange={() => setSortOption('rarity')} />Rarity</label>
+                                <label className='deck-detail-toggle'><input type='radio' name='sortOption' checked={sortOption === 'color'} onChange={() => setSortOption('color')} />Color</label>
+                                <label className='deck-detail-toggle'><input type='radio' name='sortOption' checked={sortOption === 'none'} onChange={() => setSortOption('none')} />None</label>
+                            </div>
+                        </div>
+                    )}
+
+                    {showFilters && (
+                        <div className='deck-detail-options-card'>
+                            <p className='deck-detail-options-title'>Type</p>
+                            <div className='deck-detail-options-grid'>
+                                {TYPE_OPTIONS.map((option) => (
+                                    <label key={option} className='deck-detail-toggle'>
+                                        <input type='checkbox' checked={!!selectedTypes[option]} onChange={() => toggleType(option)} />
+                                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                                    </label>
+                                ))}
+                            </div>
+                            <p className='deck-detail-options-title'>Rarity</p>
+                            <div className='deck-detail-options-grid'>
+                                {RARITY_OPTIONS.map((option) => (
+                                    <label key={option} className='deck-detail-toggle'>
+                                        <input type='checkbox' checked={!!selectedRarities[option]} onChange={() => toggleRarity(option)} />
+                                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className='deck-detail-cards-grid'>
+                        {sortedFilteredSearchResults.map((card) => {
+                            const isOwned = cardIsInInventory(card);
+
+                            return (
+                            <button
+                                key={`${card.id}-add`}
+                                className={`deck-detail-card ${isOwned ? '' : 'deck-detail-card-disabled'}`}
+                                type='button'
+                                onClick={() => handleAddCardClick(card)}
+                                title={isOwned ? 'Add to deck' : 'This card is not in your inventory'}
+                            >
+                                <img src={card.imageUrl} alt={card.name} className='deck-detail-card-image' />
+                                <span className='deck-detail-card-name'>{card.name}</span>
+                                <span className={`deck-detail-card-status ${isOwned ? 'deck-detail-card-status-owned' : 'deck-detail-card-status-locked'}`}>
+                                    {isOwned ? 'In inventory' : 'Not in inventory'}
+                                </span>
+                            </button>
+                            );
+                        })}
+                        {!isSearching && sortedFilteredSearchResults.length === 0 && (
+                            <p className='deck-detail-subtle'>Search for cards and click one to add it to this deck.</p>
+                        )}
+                    </div>
+                </section>
+            </div>
+
+            {message && (
+                <div className='deck-detail-message'>
+                    {message}
+                </div>
+            )}
         </div>
     );
 }

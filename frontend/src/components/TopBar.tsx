@@ -1,9 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // import React, {useState} from 'react';
 function TopBar()
 {
     const navigate = useNavigate();
+    const location = useLocation();
 
     function toPacks(){
         navigate('/packs');
@@ -15,11 +16,21 @@ function TopBar()
         navigate('/decks');
     }
 
+    function navClass(path: string): string {
+        return location.pathname === path ? 'nav-button nav-button-active' : 'nav-button';
+    }
+
     return(
-    <div id="topBarDiv" className="flex bg-main text-black size-12 w-full h-11">
-        <button className="border-2 border-black flex-1" onClick={() => toPacks()}>Packs</button>
-        <button className="border-2 border-black flex-1" onClick={() => toInventory()}>Inventory</button>
-        <button className="border-2 border-black flex-1" onClick={() => toDecks()}>Decks</button>
+    <div id="topBarDiv" className='topbar-shell'>
+        <div className='topbar-brand'>
+            <strong>Collection Tools</strong>
+            <span>Switch contexts without losing your place.</span>
+        </div>
+        <div className='topbar-nav'>
+            <button className={navClass('/packs')} onClick={() => toPacks()}>Packs</button>
+            <button className={navClass('/inventory')} onClick={() => toInventory()}>Inventory</button>
+            <button className={navClass('/decks')} onClick={() => toDecks()}>Decks</button>
+        </div>
     </div>
     );
 }

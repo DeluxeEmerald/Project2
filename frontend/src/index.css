@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -25,25 +25,29 @@
 }
 
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --text: #241634;
+  --text-h: #180f25;
+  --text-soft: #6d5a86;
+  --text-inverse: #fffaf0;
+  --bg: #f4ecfb;
+  --bg-deep: #1d1330;
+  --border: rgba(91, 63, 128, 0.2);
+  --border-strong: rgba(91, 63, 128, 0.34);
+  --panel: rgba(249, 243, 255, 0.82);
+  --panel-strong: rgba(252, 248, 255, 0.92);
+  --accent: #6b3fb6;
+  --accent-strong: #4d268f;
+  --accent-soft: #dec2ff;
+  --gold: #ddb65a;
   --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    rgba(37, 20, 60, 0.2) 0 22px 50px -18px, rgba(37, 20, 60, 0.08) 0 12px 24px -18px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, "Irish Grover";
+  --sans: 'Manrope', 'Segoe UI', sans-serif;
+  --heading: 'Space Grotesk', 'Segoe UI', sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -56,32 +60,9 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
 #root {
-  /* width: 1126px; leinecker moment */
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -90,12 +71,32 @@
 
 body {
   margin: 0;
-  background-image: url("/src/assets/wood.jpg");
-  background-size: cover;
-  background-position: center;
+  background:
+    radial-gradient(circle at top, rgba(221, 182, 90, 0.32), transparent 28%),
+    radial-gradient(circle at 20% 18%, rgba(107, 63, 182, 0.24), transparent 30%),
+    linear-gradient(180deg, rgba(248, 241, 255, 0.96), rgba(223, 205, 244, 0.9)),
+    url("/src/assets/wood.jpg");
+  background-size: auto, auto, auto, cover;
+  background-position: center, center, center, center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 40%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 0,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px,
+      transparent 120px
+    );
 }
 
 h1,
@@ -115,7 +116,7 @@ h1 {
   }
 }
 h2 {
-  color: #ffffff;
+  color: var(--text-h);
   font-size: 48px;
   line-height: 118%;
   letter-spacing: -0.24px;
@@ -150,6 +151,15 @@ code {
   padding-right: 1rem;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font: inherit;
+}
+
 /* #loginDiv {
   background-image: url("/src/assets/parchment.avif");
   background-size: cover;
@@ -161,11 +171,6 @@ code {
 
 
 #loginDiv {
-  background-color: rgba(236, 222, 198, 0.62);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 245, 230, 0.55);
-  box-shadow: 0 12px 32px rgba(88, 62, 36, 0.2);
   gap: 24px;
 }
 
@@ -184,9 +189,9 @@ code {
 
 #logoutButton {
   padding: 5px;
-  background-color: #1F5C57;
+  background-color: var(--accent-strong);
   border-width: 2px;
-  border-color: black;
+  border-color: var(--gold);
 }
 
 #loggedInDiv {
@@ -225,7 +230,7 @@ code {
 */
 
 .irish-grover-regular {
-  font-family: "Irish Grover", system-ui;
+  font-family: 'Space Grotesk', system-ui;
   font-weight: 400;
   font-style: normal;
 }

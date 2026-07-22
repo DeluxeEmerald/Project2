@@ -3,9 +3,11 @@ import Signup from '../components/Signup';
 const SignupPage = () =>
 {
     return(
-        <div>
-            <PageTitle />
-            <Signup />
+        <div className='app-shell'>
+            <div className='page-frame'>
+                <PageTitle />
+                <Signup />
+            </div>
         </div>
     );
 };

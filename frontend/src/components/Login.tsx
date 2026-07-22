@@ -4,6 +4,8 @@ import { buildPath} from './Path';
 import { storeToken, storeUserID } from '../tokenStorage';
 import { jwtDecode } from 'jwt-decode';
 import type { JwtPayload } from 'jwt-decode';
+import heroImage from '../assets/hero.png';
+import mtgLogo from '../assets/mtgLogo.png';
 
 interface CustomJwtPayload extends JwtPayload
 {
@@ -73,27 +75,58 @@ function Login()
     }
 
     return(
-        <div id="loginDiv" className='flex items-center bg-white rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered mt-20'>
-        <div id="leftLoginContent"><img src="src/assets/cardStack.png" alt="Magic: The Gathering Logo" width="300"></img></div>
-        <div id="rightLoginContent" className='flex flex-col items-center gap-3'>
-            <img src="src/assets/mtgLogo.png" alt="Magic: The Gathering Logo" width="400"></img><br />
-            <div className='flex items-center gap-2 text-black'>
-                <p className='w-28'>Login*:</p>
-                <input type="text" id="loginName" placeholder="Username" onChange={handleSetLoginName}
-                className='bg-white'/>
+        <section className='auth-layout'>
+            <div className='hero-panel'>
+                <span className='hero-kicker'>Collection Workspace</span>
+                <h2 className='hero-heading'>Give your Magic collection a better home.</h2>
+                <p className='hero-copy'>
+                    Open packs, browse your inventory, and organize decks from a warmer interface built around the cards instead of generic forms.
+                </p>
+                <div className='hero-stats'>
+                    <div className='hero-stat'>
+                        <strong>Packs</strong>
+                        <span>Open and reveal with a more focused presentation.</span>
+                    </div>
+                    <div className='hero-stat'>
+                        <strong>Inventory</strong>
+                        <span>Search and manage your collection without clutter.</span>
+                    </div>
+                    <div className='hero-stat'>
+                        <strong>Decks</strong>
+                        <span>Keep deck management tied to the cards you own.</span>
+                    </div>
+                </div>
+                <img className='hero-art' src={heroImage} alt='Fantasy card display' />
             </div>
-            <div className='flex items-center gap-2 text-black'>
-                <p className='w-28'>Password*:</p>
-                <input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} onKeyDown={e => {if (e.key === "Enter") doLogin(e);}}
-                className='bg-white'/>
+
+            <div id="loginDiv" className='auth-card stack-lg'>
+                <div className='stack'>
+                    <img src={mtgLogo} alt='Magic: The Gathering' width="320" className='mx-auto max-w-full' />
+                    <div>
+                        <h2 className='auth-title'>Sign in</h2>
+                        <p className='auth-copy'>Enter your account to continue to packs, inventory, and deck tools.</p>
+                    </div>
+                </div>
+
+                <div className='auth-form'>
+                    <label>
+                        <span className='field-label'>Login</span>
+                        <input type="text" id="loginName" placeholder="Username" onChange={handleSetLoginName}
+                        className='text-input'/>
+                    </label>
+                    <label>
+                        <span className='field-label'>Password</span>
+                        <input type="password" id="loginPassword" placeholder="Password" onChange={handleSetPassword} onKeyDown={e => {if (e.key === "Enter") doLogin(e);}}
+                        className='text-input'/>
+                    </label>
+                    <input type="submit" id="loginButton" value = "Enter Collection" onClick={doLogin}
+                    className='primary-button' />
+                    <p className='text-black'>Don&apos;t have an account? <button onClick={toSignUp}
+                    className='inline-button'>Sign Up</button></p>
+                    {message && <span id="loginResult" className='auth-message'>{message}</span>}
+                </div>
             </div>
-            <input type="submit" id="loginButton" value = "Sign In" onClick={doLogin}
-            className='bg-main hover:bg-accent2 text-black rounded-full w-16 border-2 border-black hover:cursor-pointer' />
-            <p className='text-black'>Don't have an account? <button onClick={toSignUp}
-            className='text-blue-600 underline hover:cursor-pointer'>Sign Up</button></p>
-            <span id="loginResult">{message}</span>
-        </div>
-        </div>
+        </section>
     );
 };
 

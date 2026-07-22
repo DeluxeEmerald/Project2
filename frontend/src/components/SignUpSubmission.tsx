@@ -5,13 +5,15 @@ function SignUpSubmission()
     }
 
     return(
-        <div id="loginDiv" className='flex flex-col items-center bg-white text-black rounded-3xl p-8 max-w-m mx-auto h-100 gap-4 centered mt-20'>
-            <div>
-                <p>You have been sent a verification email has been sent to your inbox. If you can't find it, check your spam.</p>
-            </div>
-            <div>
-            <button className="bg-main shadow-lg shadow-main/50 rounded-lg w-80 hover:bg-wood cursor-pointer"
-            onClick={toLogin}>Back to Login</button>
+        <div className='app-shell'>
+            <div className='page-frame'>
+                <div className='notice-card centered stack-lg mt-20 text-black'>
+                    <div className='stack'>
+                        <h2 className='auth-title'>Check your inbox</h2>
+                        <p className='auth-copy'>A verification email has been sent. If it does not show up right away, check your spam folder and return once your account is verified.</p>
+                    </div>
+                    <button className='primary-button' onClick={toLogin}>Back to Login</button>
+                </div>
             </div>
         </div>
     );

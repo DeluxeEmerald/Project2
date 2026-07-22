@@ -4,12 +4,24 @@ import { retrieveToken, storeToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
 import cardStack from '../assets/cardStack.png';
 
+interface DeckItem {
+    id?: string;
+    _id?: string;
+    deckID?: string;
+    deckName: string;
+}
+
 function Decks()
 {
 
     // let firstName : string = ud.firstName;
     // let lastName : string = ud.lastName;
     const [message,setMessage] = useState('');
+    const [decks, setDecks] = useState<DeckItem[]>([]);
+    const [showCreateDeck, setShowCreateDeck] = useState(false);
+    const [newDeckName, setNewDeckName] = useState('');
+    const [isCreatingDeck, setIsCreatingDeck] = useState(false);
+    const [deletingDeckId, setDeletingDeckId] = useState('');
     const hasLoaded = useRef(false);
 
     const navigate = useNavigate();
@@ -18,35 +30,108 @@ function Decks()
         navigate(`/deckdetails/${deck.id}`, { state: { deck:deck } });
     }
 
-    function toDeckAdd() {
-        navigate(`/createdeck`);
+    function normalizeDeck(deck: DeckItem): DeckItem {
+        return {
+            ...deck,
+            id: deck.id ?? deck._id,
+        };
     }
 
-    function createNewDeckDiv(deck:any, text:string, classNames:string) : HTMLDivElement {
-        const div = document.createElement('div');
-        div.className = 'rounded-2xl m-4 flex items-center justify-center';
-        div.classList.add(classNames);
+    function toDeckAdd() {
+        setNewDeckName('');
+        setShowCreateDeck(true);
+    }
 
-        const button: HTMLButtonElement = document.createElement('button');
-        button.className = 'flex flex-col items-center gap-3 p-2 w-40';
-        button.onclick = () => deck ? toDeckDetails(deck) : toDeckAdd();
+    async function createDeck(): Promise<void> {
+        const deckName = newDeckName.trim();
+        if (!deckName) {
+            setMessage('Enter a deck name before creating it.');
+            return;
+        }
 
-        const image = document.createElement('img');
-        image.src = cardStack;
-        image.alt = text;
-        image.className = 'w-32 h-48 object-contain';
+        const obj = {
+            jwtToken: retrieveToken(),
+            userId: JSON.parse(retrieveUserID()).id,
+            deckName: deckName,
+            public: false,
+        };
 
-        const label = document.createElement('span');
-        label.textContent = text;
-        label.className = 'text-center text-sm font-semibold text-white';
+        try {
+            setIsCreatingDeck(true);
+            const response = await fetch(buildPath('api/createdeck'), {
+                method: 'POST',
+                body: JSON.stringify(obj),
+                headers: { 'Content-Type': 'application/json' },
+            });
 
-        button.appendChild(image);
-        button.appendChild(label);
+            const txt = await response.text();
+            const res = JSON.parse(txt);
+            if (res.error && res.error.length > 0) {
+                setMessage(res.error);
+                return;
+            }
 
-        div.appendChild(button);
+            storeToken(res.jwtToken);
+            setMessage(`Created deck: ${deckName}`);
+            setShowCreateDeck(false);
+            setNewDeckName('');
+            await getDecks(null);
+        }
+        catch (error:any)
+        {
+            setMessage(error.toString());
+        }
+        finally {
+            setIsCreatingDeck(false);
+        }
+    }
 
-        // div.textContent = text;
-        return div;
+    async function removeDeck(deck: DeckItem): Promise<void> {
+        const deckName = deck.deckName || 'this deck';
+        const resolvedDeckId = (deck.deckID ?? deck.id ?? '').toString();
+
+        if (!resolvedDeckId) {
+            setMessage('Could not determine which deck to remove.');
+            return;
+        }
+
+        const confirmed = window.confirm(`Remove ${deckName}? This cannot be undone.`);
+        if (!confirmed) {
+            return;
+        }
+
+        const obj = {
+            jwtToken: retrieveToken(),
+            deckId: resolvedDeckId,
+        };
+
+        try {
+            setDeletingDeckId(resolvedDeckId);
+            const response = await fetch(buildPath('api/removedeck'), {
+                method: 'POST',
+                body: JSON.stringify(obj),
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            const txt = await response.text();
+            const res = JSON.parse(txt);
+
+            if (res.error && res.error.length > 0) {
+                setMessage(res.error);
+                return;
+            }
+
+            storeToken(res.jwtToken);
+            setMessage(`Removed deck: ${deckName}`);
+            await getDecks(null);
+        }
+        catch (error:any)
+        {
+            setMessage(error.toString());
+        }
+        finally {
+            setDeletingDeckId('');
+        }
     }
 
     async function getDecks(e:any) : Promise<void>
@@ -70,18 +155,8 @@ function Decks()
                 storeToken(res.jwtToken);
             }
 
-            let results = res.results;
-            
-            const container = document.getElementById("decksContainer");
-
-            if (container) container.innerHTML = '';
-            results.forEach((element: any) => {
-                const div = createNewDeckDiv(element, element.deckName, "deckDiv");
-                container?.appendChild(div);
-            });
-
-            const div = createNewDeckDiv(null, "Add new deck", "deckDiv");
-            container?.appendChild(div);
+            const results = (res.results || []).map((element: DeckItem) => normalizeDeck(element));
+            setDecks(results);
         }
         catch(error:any)
         {
@@ -104,9 +179,81 @@ function Decks()
     }, []);
     
     return(
-    <div id="cardUIDiv" className='rounded-3xl w-full flex-col items-center justify-center'>
+    <div id="cardUIDiv" className='deck-shell flex-col items-center justify-center gap-6'>
+        <div className='deck-header w-full'>
+            <div>
+                <p className='brand-mark'>Decks</p>
+                <h2 className='deck-title'>Organize your deck library</h2>
+            </div>
+            <p className='deck-subtitle'>Browse your saved decks, jump into deck details, or start a new build from the same collection workspace.</p>
+        </div>
+
         {message && <p className='text-center text-red-600'>{message}</p>}
-        <div id="decksContainer" className='flex flex-wrap justify-center items-start'></div>
+        <div id="decksContainer" className='deck-grid w-full'>
+            {decks.map((deck) => (
+                <div key={deck.id ?? deck.deckName} className='deck-card deckDiv'>
+                    <div className='deck-card-button deck-card-content'>
+                        <button type='button' className='deck-open-button' onClick={() => toDeckDetails(deck)}>
+                            <div className='deck-card-image-wrap'>
+                                <img src={cardStack} alt={deck.deckName} className='deck-card-image' />
+                            </div>
+                            <span className='deck-card-name block'>{deck.deckName}</span>
+                            <span className='deck-card-meta block'>Open deck details</span>
+                        </button>
+                        <button
+                            type='button'
+                            className='secondary-button mt-3 w-full'
+                            onClick={() => void removeDeck(deck)}
+                            disabled={deletingDeckId === ((deck.deckID ?? deck.id ?? '').toString())}
+                        >
+                            {deletingDeckId === ((deck.deckID ?? deck.id ?? '').toString()) ? 'Removing...' : 'Remove deck'}
+                        </button>
+                    </div>
+                </div>
+            ))}
+
+            <div className='deck-card deck-card-add deckDiv'>
+                <button className='deck-card-button' onClick={toDeckAdd}>
+                    <div className='deck-card-image-wrap'>
+                        <img src={cardStack} alt='Add new deck' className='deck-card-image' />
+                    </div>
+                    <span className='deck-card-name'>Add new deck</span>
+                    <span className='deck-card-meta'>Create a new deck</span>
+                </button>
+            </div>
+        </div>
+
+        {showCreateDeck && (
+            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4'>
+                <div className='w-full max-w-md rounded-[28px] border border-[rgba(91,63,128,0.16)] bg-[rgba(255,252,255,0.96)] p-6 text-left shadow-[0_16px_28px_rgba(53,30,90,0.12)] backdrop-blur'>
+                    <p className='brand-mark'>Create Deck</p>
+                    <h2 className='mt-4 text-3xl text-[var(--text-h)]'>Name your new deck</h2>
+                    <p className='mt-3 text-[var(--text-soft)]'>Create a new empty deck and it will appear in your deck grid immediately.</p>
+                    <label className='mt-5 block'>
+                        <span className='field-label'>Deck name</span>
+                        <input
+                            type='text'
+                            value={newDeckName}
+                            onChange={(e) => setNewDeckName(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    void createDeck();
+                                }
+                            }}
+                            className='text-input'
+                            placeholder='Esper Artifacts'
+                            autoFocus
+                        />
+                    </label>
+                    <div className='mt-6 flex flex-wrap gap-3'>
+                        <button type='button' className='secondary-button' onClick={() => setShowCreateDeck(false)} disabled={isCreatingDeck}>Cancel</button>
+                        <button type='button' className='primary-button' onClick={() => void createDeck()} disabled={isCreatingDeck}>
+                            {isCreatingDeck ? 'Creating...' : 'Create Deck'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
     </div>
     );
 }

@@ -1,13 +1,11 @@
-const app_name = 'COP4331-89.xyz';
-
 export function buildPath(route: string): string
 {
-  if (import.meta.env.MODE != 'development')
+  const envBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  if (envBaseUrl && envBaseUrl.trim().length > 0)
   {
-    return 'http://' + app_name + ':5000/' + route;
+    return `${envBaseUrl.replace(/\/$/, '')}/${route}`;
   }
-  else
-  {
-    return 'http://localhost:5000/' + route;
-  }
+
+  const host = window.location.hostname || 'localhost';
+  return `http://${host}:5000/${route}`;
 }

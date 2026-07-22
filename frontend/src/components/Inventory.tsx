@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import { buildPath } from './Path';
-import { storeToken, retrieveToken, clearToken, retrieveUserID } from '../tokenStorage';
+import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -16,12 +16,45 @@ const Inventory = () =>
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
     const hasLoaded = useRef(false);
+    const inventoryCardIdsRef = useRef<Set<string>>(new Set());
     const navigate = useNavigate();
+
+    function normalizeObjectId(value: any): string {
+        if (!value) return '';
+        if (typeof value === 'string') return value;
+        if (typeof value === 'object' && typeof value.$oid === 'string') return value.$oid;
+        if (typeof value.toHexString === 'function') return value.toHexString();
+        const asString = String(value);
+        return asString === '[object Object]' ? '' : asString;
+    }
+
+    async function refreshInventoryCardIds(): Promise<void> {
+        const obj = {jwtToken: retrieveToken(), userID: userId};
+        const response = await fetch(buildPath('api/getinventory'),
+            {method:'POST',body:JSON.stringify(obj),headers:{'Content-Type':'application/json'}});
+
+        const txt = await response.text();
+        const res = JSON.parse(txt);
+
+        if(res.error && res.error.length > 0){
+            throw new Error(res.error);
+        }
+
+        storeToken(res.jwtToken);
+        const cardIds = new Set<string>();
+        (res.results || []).forEach((element: any) => {
+            const normalizedId = normalizeObjectId(element.id ?? element.cardId ?? element._id);
+            if (normalizedId.length > 0) {
+                cardIds.add(normalizedId);
+            }
+        });
+        inventoryCardIdsRef.current = cardIds;
+    }
 
     function ImageButton(imageSrc:string, cardName:string) : string {
     return `
-        <button class="h-60 w-40 p-0 border-0 overflow-hidden rounded-[23px]" >
-        <img src="${imageSrc}" alt="${cardName}" class="h-full w-full object-contain" />
+        <button class="inventory-card-button" >
+        <img src="${imageSrc}" alt="${cardName}" class="inventory-card-image" />
         </button>
         `;
     }
@@ -43,6 +76,8 @@ const Inventory = () =>
             if (selectedInventory) isSearchingInv = selectedInventory.checked;
 
             let response = null;
+
+            await refreshInventoryCardIds();
 
             if(isSearchingInv){
                 response = await fetch(buildPath('api/getinventory'),
@@ -68,7 +103,7 @@ const Inventory = () =>
 
             _results = _results.map((element: any) => ({
                 ...element,
-                id: element.id ?? element.cardId
+                id: normalizeObjectId(element.id ?? element.cardId ?? element._id)
             }));
 
             _results.sort(getSortComparator());
@@ -79,9 +114,15 @@ const Inventory = () =>
 
                 _results.forEach((element: any) => {
                     if(checkFilter(element.typeLine, element.rarity)) {
+                        const isOwned = inventoryCardIdsRef.current.has(element.id);
                         const cardAdd = document.createElement('div');
-                        cardAdd.className = 'card';
-                        cardAdd.innerHTML = ImageButton(element.imageUrl, element.name);
+                        cardAdd.className = `inventory-card ${isOwned ? '' : 'inventory-card-disabled'}`;
+                        cardAdd.innerHTML = `
+                            ${ImageButton(element.imageUrl, element.name)}
+                            <div class="inventory-card-name">${element.name}</div>
+                            <div class="inventory-card-meta">${element.typeLine}</div>
+                            <div class="inventory-card-status ${isOwned ? 'inventory-card-status-owned' : 'inventory-card-status-locked'}">${isOwned ? 'In inventory' : 'Not in inventory'}</div>
+                        `;
 
                         cardAdd.querySelector('button')?.addEventListener('click', () => {
                             toCardDetails(element);
@@ -132,23 +173,26 @@ const Inventory = () =>
                 container.className ='flex justify-center items-center';
 
                 const list = document.createElement('div');
-                list.className = 'flex flex-col gap-2 w-40 p-3 rounded-md';
+                list.className = 'inventory-popover';
                 list.innerHTML = `
-                <div class="flex items-center gap-1">
+                <div class="inventory-popover-title">Sort cards</div>
+                <div class="inventory-option-list">
+                <div class="inventory-option">
                     <input type="radio" id="alphabet" name="sortOption" class="w-4 h-4">
                     <label for="alphabet" class="text-sm whitespace-nowrap">Alphabet</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="radio" id="manaCost" name="sortOption" class="w-4 h-4">
                     <label for="manaCost" class="text-sm whitespace-nowrap">Mana Cost</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="radio" id="rarity" name="sortOption" class="w-4 h-4">
                     <label for="rarity" class="text-sm whitespace-nowrap">Rarity</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="radio" id="color" name="sortOption" class="w-4 h-4">
                     <label for="color" class="text-sm whitespace-nowrap">Color</label>
+                </div>
                 </div>
                 `;
                 container.appendChild(list);
@@ -205,60 +249,65 @@ const Inventory = () =>
                 container.className ='flex justify-center items-center';
 
                 const list = document.createElement('div');
-                list.className = 'grid grid-cols-2 gap-x-4 gap-y-2 w-86 p-3 rounded-md';
+                list.className = 'inventory-popover';
                 list.innerHTML = `
-                <p class='col-span-2'>Ownership</p>
-                <div class="flex items-center gap-1">
+                <div class='inventory-popover-title'>Filter cards</div>
+                <div class='inventory-option-list'>
+                <p class='inventory-popover-title'>Ownership</p>
+                <div class="inventory-option">
                     <input type="checkbox" id="owned" value="owned" class="w-4 h-4" checked>
                     <label for="owned" class="text-sm">In Inventory</label>
                 </div>
-                <div class="flex items-center gap-1">
-                </div>
-                    <p class='col-span-2 justify-center'>Type</p>
-                <div class="flex items-center gap-1">
+                <p class='inventory-popover-title'>Type</p>
+                <div class='inventory-option-grid'>
+                <div class="inventory-option">
                     <input type="checkbox" id="creature" value="creature" class="w-4 h-4">
                     <label for="creature" class="text-sm">Creature</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="land" value="land" class="w-4 h-4">
                     <label for="land" class="text-sm">Land</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="instant" value="instant" class="w-4 h-4">
                     <label for="instant" class="text-sm">Instant</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="sorcery" value="sorcery" class="w-4 h-4">
                     <label for="sorcery" class="text-sm">Sorcery</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="artifact" value="aritfact" class="w-4 h-4">
                     <label for="artifact" class="text-sm">Artifact</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="enchantment" value="enchantment" class="w-4 h-4">
                     <label for="enchantment" class="text-sm">Enchantment</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="planeswalker" value="planeswalker" class="w-4 h-4">
                     <label for="planeswalker" class="text-sm">Planeswalker</label>
                 </div>
-                <p class='col-span-2'>Rarity</p>
-                <div class="flex items-center gap-1">
+                </div>
+                <p class='inventory-popover-title'>Rarity</p>
+                <div class='inventory-option-grid'>
+                <div class="inventory-option">
                     <input type="checkbox" id="common" value="common" class="w-4 h-4">
                     <label for="common" class="text-sm">Common</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="uncommon" value="uncommon" class="w-4 h-4">
                     <label for="uncommon" class="text-sm">Uncommon</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="rare" value="rare" class="w-4 h-4">
                     <label for="rare" class="text-sm">Rare</label>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="inventory-option">
                     <input type="checkbox" id="mythic" value="mythic" class="w-4 h-4">
                     <label for="mythic" class="text-sm">Mythic</label>
+                </div>
+                </div>
                 </div>
                 `;
                 container.appendChild(list);
@@ -284,31 +333,43 @@ const Inventory = () =>
     }, []);
     
     return(
-    <div id="cardUIDiv" className='rounded-3xl w-full flex items-center justify-center flex-col text-black gap-4 font-grover'>
-        <p className='text-black text-xl'>Inventory</p>
+    <div id="cardUIDiv" className='inventory-shell flex items-center justify-center flex-col text-black gap-6'>
+        <div className='inventory-header w-full'>
             <div>
-            Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCard(e);}} 
-            className='bg-white' />
-            <button type="button" id="searchCardButton" className="bg-main hover:bg-accent2 rounded-full w-32 ml-4"
-                onClick={searchCard}> Search Card</button>
+                <p className='brand-mark'>Inventory</p>
+                <h2 className='inventory-title'>Browse your collection</h2>
+            </div>
+            <p className='inventory-subtitle'>Search owned cards, sort the results, and filter by type or rarity from a cleaner card browser.</p>
         </div>
 
-        <div className='flex flex-col items-center gap-2'>
-            <div>
-                <button type="button" id="Sort" className="bg-main hover:bg-accent2 w-32"
-                    onClick={showSort}> Sort</button>   
-                <button type="button" id="Filter" className="bg-main hover:bg-accent2 w-32"
-                    onClick={showFilterOptions}> Filter</button>
+        <div className='inventory-toolbar w-full'>
+            <div className='inventory-search'>
+                <label className='inventory-field'>
+                    <span className='field-label'>Search cards</span>
+                    <input type="text" id="searchText" placeholder="Search by card name, type, set, or artist" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCard(e);}} 
+                    className='text-input' />
+                </label>
+                <button type="button" id="searchCardButton" className="primary-button"
+                    onClick={searchCard}>Search</button>
             </div>
 
-            <div className='flex flex-row gap-2'>
-                <div id='sortOption' className=''></div>   
-                <div id='filterOption' className=''></div>
+            <div className='inventory-actions'>
+                <button type="button" id="Sort" className="secondary-button"
+                    onClick={showSort}>Sort</button>
+                <button type="button" id="Filter" className="secondary-button"
+                    onClick={showFilterOptions}>Filter</button>
             </div>
         </div>
-        <span id="cardSearchResult">{searchResults}</span>
-        <span >{message}</span>
-        <p id="cardList" className='flex flex-wrap gap-2 justify-center mb-4' ></p>
+
+        <div className='inventory-popover-row w-full'>
+            <div id='sortOption'></div>
+            <div id='filterOption'></div>
+        </div>
+        <div className='inventory-status'>
+            {searchResults && <span id="cardSearchResult" className='inventory-pill'>{searchResults}</span>}
+            {message && <span className='inventory-pill'>{message}</span>}
+        </div>
+        <p id="cardList" className='inventory-grid w-full'></p>
     </div>
     );
 }
