@@ -4,8 +4,10 @@ import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
 
 
-const Inventory = () =>
-{
+const Inventory = ({ onCardClick, inventoryOnly }: {
+    onCardClick?: (card: any) => void;
+    inventoryOnly?: boolean;
+}) => {
 
     let _ud : any = retrieveUserID();
     let ud = JSON.parse( _ud );
@@ -73,7 +75,7 @@ const Inventory = () =>
         {
             const selectedInventory = document.getElementById("owned") as HTMLInputElement | null;
             var isSearchingInv = true;
-            if (selectedInventory) isSearchingInv = selectedInventory.checked;
+            if (!inventoryOnly && selectedInventory) isSearchingInv = selectedInventory.checked;
 
             let response = null;
 
@@ -323,19 +325,29 @@ const Inventory = () =>
     }
 
     function toCardDetails(card: any) {
-        navigate(`/card/${card.id}`, { state: { card:card } });
+    if (onCardClick) {
+      onCardClick(card);
+    } else {
+      navigate(`/card/${card.id}`, { state: { card } });
     }
+  }
 
     useEffect(() => {
         if (hasLoaded.current) return;
         hasLoaded.current = true;
-        searchCard(null);
+
+        const run = async () => {
+            await searchCard(null);
+        };
+
+        run();
     }, []);
     
     return(
     <div id="cardUIDiv" className='inventory-shell flex items-center justify-center flex-col text-black gap-6'>
         <div className='inventory-header w-full'>
             <div>
+<<<<<<< HEAD
                 <p className='brand-mark'>Inventory</p>
                 <h2 className='inventory-title'>Browse your collection</h2>
             </div>
@@ -351,6 +363,24 @@ const Inventory = () =>
                 </label>
                 <button type="button" id="searchCardButton" className="primary-button"
                     onClick={searchCard}>Search</button>
+=======
+            Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCard(e);}} 
+            className='bg-white' />
+            <button type="button" id="searchCardButton" 
+            className="bg-main text-white hover:text-black hover:bg-wood rounded-full 
+            w-32 ml-4 border-2 border-black"
+                onClick={searchCard}> Search Card</button>
+        </div>
+
+        <div className='flex flex-col items-center gap-2'>
+            <div>
+                <button type="button" id="Sort" className="bg-main text-white hover:text-black 
+                hover:bg-wood w-32 border-2 border-black"
+                    onClick={showSort}> Sort</button>   
+                <button type="button" id="Filter" className="bg-main text-white hover:text-black 
+                hover:bg-wood w-32 border-2 border-black"
+                    onClick={showFilterOptions}> Filter</button>
+>>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
             </div>
 
             <div className='inventory-actions'>

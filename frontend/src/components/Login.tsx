@@ -74,6 +74,10 @@ function Login()
         navigate('/signup');
     }
 
+    function toResetPassword(){
+        navigate('/requestreset');
+    }
+
     return(
         <section className='auth-layout'>
             <div className='hero-panel'>
@@ -126,7 +130,19 @@ function Login()
                     {message && <span id="loginResult" className='auth-message'>{message}</span>}
                 </div>
             </div>
+<<<<<<< HEAD
         </section>
+=======
+            <input type="submit" id="loginButton" value = "Sign In" onClick={doLogin}
+            className='bg-main hover:bg-wood text-white hover:text-black rounded-full w-32 border-2 border-black hover:cursor-pointer' />
+            <p className='text-black'>Don't have an account? <button onClick={toSignUp}
+            className='text-blue-600 underline hover:cursor-pointer'>Sign Up</button></p>
+            <span id="loginResult" className='text-marble'>{message}</span>
+            <p className='text-black'>Forgot password? <button onClick={toResetPassword}
+            className='text-blue-600 underline hover:cursor-pointer'>Reset</button></p>
+        </div>
+        </div>
+>>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
     );
 };
 

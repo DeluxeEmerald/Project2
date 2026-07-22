@@ -467,9 +467,9 @@ app.post('/api/addinventory', async (req, res, next) =>
   try
   {
     const db = client.db('MTG');
- 
+
     const existing = await db.collection('Inventory').find(
-      {userID:new ObjectId(userID), cardID:new ObjectId(cardID)}
+      {userID:new ObjectId(userID.id), cardID:new ObjectId(cardID)}
     ).toArray();
  
     if( existing.length > 0 )
@@ -625,7 +625,6 @@ app.post('/api/getinventory', async (req, res, next) =>
       } );
     }
 
-    // ==========================================================================================
     var query = {};
 
     let orConditions = [];
@@ -651,7 +650,6 @@ app.post('/api/getinventory', async (req, res, next) =>
     {
       _ret.push( buildCardObject(results2[i]) );
     }
-    // ==========================================================================================
   }
   catch(e)
   {
@@ -903,17 +901,17 @@ app.post('/api/getdecksbycardout', async (req, res, next) =>
 
 app.post('/api/createdeck', async (req, res, next) =>
 {
-  // incoming: jwtToken, userId, deckName, public, inventoryId
+  // incoming: jwtToken, userId, deckName, public
   // outgoing: id, deckID, error, jwtToken
   // Creates a "cover" document in deck (the browsable/searchable
   // summary) and a matching contents document in Decks (holds the
   // actual card list), linked via Decks.deckID = deck._id.
- 
+
   var error = '';
-  const { jwtToken, userId, deckName, public: isPublic} = req.body;
+  const { jwtToken, userId, deckName, public: isPublic } = req.body;
   var id = -1;
   var deckID = null;
- 
+
   try
   {
     if( token.isExpired(jwtToken) )
@@ -926,23 +924,35 @@ app.post('/api/createdeck', async (req, res, next) =>
   catch(e)
   {
     console.log(e.message);
+    var r = { error: 'Invalid JWT', jwtToken: '' };
+    res.status(200).json(r);
+    return;
   }
- 
+
+  if( !userId || !ObjectId.isValid(userId) )
+  {
+    var r = { error: 'Invalid or missing userId', jwtToken: '' };
+    res.status(200).json(r);
+    return;
+  }
+
+  const userObjectId = new ObjectId(userId);
+
   try
   {
     const db = client.db('MTG');
- 
+
     const newCover = {
       name: deckName,
       public: isPublic === true,
-      userID: new ObjectId(userId)
+      userID: userObjectId
     };
     const coverResult = await db.collection('deck').insertOne(newCover);
     id = coverResult.insertedId;
     deckID = id;
- 
+
     const newDeck = {
-      userId: new ObjectId(userId),
+      userId: userObjectId,
       deckName: deckName,
       cards: [],
       public: isPublic === true,
@@ -954,18 +964,18 @@ app.post('/api/createdeck', async (req, res, next) =>
   {
     error = e.toString();
   }
- 
+
   var refreshedToken = null;
   try
   {
     var refreshedResult = token.refresh(jwtToken);
-    refreshedToken = refreshedResult.accessToken
+    refreshedToken = refreshedResult.accessToken;
   }
   catch(e)
   {
     console.log(e.message);
   }
- 
+
   var ret = { id:id, deckID:deckID, error:error, jwtToken:refreshedToken };
   res.status(200).json(ret);
 });
@@ -1052,10 +1062,6 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
           }
           else if( existingCard )
           {
-            // await db.collection('Decks').updateOne(
-            //   { _id: new ObjectId(deckId), "cards.cardId": new ObjectId(cardId) }//,
-            //   // { $inc: { "cards.$.quantity": quantity } }
-            // );
             error = 'The card is already in this deck!';
           }
           else

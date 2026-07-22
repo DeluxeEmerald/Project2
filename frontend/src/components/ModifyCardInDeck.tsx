@@ -112,6 +112,11 @@ function AddedCardToDeck() {
     
                 let results = res.results;
                 
+<<<<<<< HEAD
+=======
+                document.getElementById("decksContainer");
+    
+>>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
                 results.forEach((element: any) => {
                     setNewDeck(element);
                 });
@@ -126,7 +131,6 @@ function AddedCardToDeck() {
 
     async function awaitUpdate() {
         setMessage("Loading...");
-        console.log(deck);
         if (addrm) {
             const error = await addToDeck();
             await getDecks();

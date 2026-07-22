@@ -13,9 +13,14 @@ import Inventory from './components/Inventory';
 import Decks from './components/Decks';
 import CardDetails from './components/CardDetails';
 import SignUpSubmission from './components/SignUpSubmission';
+import VerifyEmail from './components/VerifyEmail';
+import RequestReset from './components/ResetRequest';
+import ResetPassword from './components/ResetPassword';
 
 import DeckDetails from './components/DeckDetails';
 import Modified from './components/ModifyCardInDeck';
+import CreateDeck from './components/CreateDeck';
+import DeckDeleteConfirm from './components/DeckDeleteConfirm';
 
 function App() {
 return (
@@ -24,14 +29,21 @@ return (
       <Route path="/" element={<LoginPage />} />
       <Route path="/confirm" element={<SignUpSubmission />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
+<<<<<<< HEAD
+=======
+      <Route path="/requestreset" element={<RequestReset />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+>>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
       <Route path="/signup" element={<SignupPage />} />
 
       <Route element={<LoggedInTopBar />}>
         <Route path="/packs" element={<Packs />} />
-        <Route path="/openpack" element={<OpenPack />}></Route>
+        <Route path="/openpack" element={<OpenPack />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/card/:cardId" element={<CardDetails />} />
         <Route path="/decks/" element={<Decks />} />
+        <Route path="/createdeck" element={<CreateDeck />} />
+        <Route path="/deckdelete" element={<DeckDeleteConfirm />} />
         <Route path="/deckdetails/:deckId" element={<DeckDetails />} />
         <Route path="/modifycard/:deckId" element={<Modified />} />
       </Route>

@@ -2,10 +2,16 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const app = express();
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { MongoClient, ObjectId } = require('mongodb');
 const url = process.env.MONGODB_URI;
+
+if (!url) {
+  console.error('Missing MONGODB_URI in environment. Check .env in backend root.');
+  process.exit(1);
+}
+
 const client = new MongoClient(url);
 client.connect();
 
