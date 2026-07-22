@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { buildPath } from './Path';
 import packImage from '../assets/pack.png';

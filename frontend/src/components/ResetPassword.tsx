@@ -3,45 +3,51 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { buildPath } from './Path';
 
 function ResetPassword() {
-  const [searchParams] = useSearchParams();
-  const [password, setPassword] = useState('');
-  const [status, setStatus] = useState('');
-  const [errors, setErrors] = useState([] as String[]);
-  const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const [password, setPassword] = useState('');
+    const [status, setStatus] = useState('');
+    const [errors, setErrors] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
 
-  async function submitPassword()  : Promise<void>{
-    const token = searchParams.get('token');
+    async function submitPassword(): Promise<void> {
+        const token = searchParams.get('token');
 
-    var obj = {token: token,password:password};
-    var js = JSON.stringify(obj);
+        if (!token) {
+            setStatus('Missing or invalid reset token. Please request a new reset email.');
+            return;
+        }
 
-    try{
-        if(validatePassword()){
-            const response = await fetch(buildPath('api/resetpassword'), {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: js })
+        const obj = { token: token, password: password };
+        const js = JSON.stringify(obj);
 
-            if(!response.ok) {
-                setStatus(response.status.toString());
-                return;
-            }
+        try {
+            if (validatePassword()) {
+                setIsSubmitting(true);
+                const response = await fetch(buildPath('api/resetpassword'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: js,
+                });
 
-            var res = JSON.parse(await response.text());
+                if (!response.ok) {
+                    setStatus(response.status.toString());
+                    return;
+                }
 
-            if( res.error && res.error.length > 0 )
-                {
+                const res = JSON.parse(await response.text());
+
+                if (res.error && res.error.length > 0) {
                     setStatus(res.error);
-                }
-                else
-                {
-                   setStatus("Password Reset"); 
+                } else {
+                    setStatus('Password reset complete. You can log in now.');
                 }
             }
-    }
-    catch(error:any)
-    {
-                alert(error.toString());
-                return;
-    }
+        } catch (error: any) {
+            setStatus(error.toString());
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     function toLogin(){
@@ -49,53 +55,99 @@ function ResetPassword() {
     }
     
 
-  function validatePassword(){
+    function validatePassword(){
         const minLength = 8;
         const upperCase = /[A-Z]/;
         const specialCharacters = /[!@#$%^&*(),.?":{}|<>_\-+=[\];'~`]/g;
 
-        const errors = [];
+        const nextErrors: string[] = [];
 
         if (password.length < minLength){
-            errors.push("Password must be at least 8 characters long.");
+            nextErrors.push('Password must be at least 8 characters long.');
         }
 
         if (!upperCase.test(password)){
-            errors.push("Password must contain at least 1 uppercase letter.")
+            nextErrors.push('Password must contain at least 1 uppercase letter.');
         }
         
         const specialCharMatches = password.match(specialCharacters) || [];
         if (specialCharMatches.length < 2) {
-            errors.push("Password must contain at least 2 special characters.");
+            nextErrors.push('Password must contain at least 2 special characters.');
         }
 
-        setErrors(errors);
-        return errors.length === 0;
+        setErrors(nextErrors);
+        return nextErrors.length === 0;
     }
 
-  return (
-    <div id="loginDiv" className='mt-40 flex flex-col items-center rounded-2xl p-8 max-w-m h-full gap-4'>
-        <span id="inner-title" className="font-bold underline text-marble">Reset Password</span><br />
-        <span id="inner-title" className="font-bold text-marble">Required Fields are 
-            <p className="text-magic">Marked*</p></span><br />
-        <div className='flex items-center gap-2 text-magic'>
-        <p className='w-32'>New Password*:</p> <input type="password" id="password" placeholder="New Password"
-        value = {password} onChange={(e) => setPassword(e.target.value)}
-        className='bg-white'/>
-        </div>
-      <input type="submit" id="loginButton" className="bg-main text-white hover:text-black shadow-lg shadow-main/50 
-      rounded-lg w-80 hover:bg-wood cursor-pointer border-2 border-black" value = "Reset Password"
-      onClick={submitPassword}/>
-      <p className="text-marble">{status}</p>
-      <span id="loginResult" className="text-marble">
-            {errors.map((err, index) => 
-                (<p key = {index}>{err}</p>))}</span>
-        <button onClick={toLogin}
-        className="bg-wood shadow-lg shadow-main/50 text-black hover:text-white border-2 border-black
-        rounded-lg w-80 hover:bg-main cursor-pointer"
-        >Back to Login</button>
-    </div>
-  );
+    return (
+        <section className='auth-layout'>
+            <div className='hero-panel'>
+                <span className='hero-kicker'>Set New Password</span>
+                <h2 className='hero-heading'>Protect your account again.</h2>
+                <p className='hero-copy'>
+                    Choose a strong replacement password to finish account recovery.
+                </p>
+                <div className='hero-stats'>
+                    <div className='hero-stat'>
+                        <strong>8+</strong>
+                        <span>Minimum characters required.</span>
+                    </div>
+                    <div className='hero-stat'>
+                        <strong>A-Z</strong>
+                        <span>At least one uppercase letter.</span>
+                    </div>
+                    <div className='hero-stat'>
+                        <strong>2</strong>
+                        <span>Include two special characters.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id='loginDiv' className='auth-card stack-lg'>
+                <div>
+                    <h2 className='auth-title'>Create a new password</h2>
+                    <p className='auth-copy'>Your reset link is one-time use. Submit once to complete reset.</p>
+                </div>
+
+                <div className='auth-form'>
+                    <label>
+                        <span className='field-label'>New Password</span>
+                        <input
+                            type='password'
+                            id='password'
+                            placeholder='Enter your new password'
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className='text-input'
+                        />
+                    </label>
+
+                    <button
+                        type='button'
+                        className='primary-button'
+                        onClick={submitPassword}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Resetting...' : 'Reset Password'}
+                    </button>
+
+                    {status && <p className='auth-message'>{status}</p>}
+
+                    {errors.length > 0 && (
+                        <div className='error-list'>
+                            {errors.map((err, index) => (
+                                <p key={index}>{err}</p>
+                            ))}
+                        </div>
+                    )}
+
+                    <button onClick={toLogin} className='secondary-button'>
+                        Back to Login
+                    </button>
+                </div>
+            </div>
+        </section>
+    );
 }
 
 export default ResetPassword;
