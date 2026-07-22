@@ -81,7 +81,7 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
             await refreshInventoryCardIds();
 
             if(isSearchingInv){
-                response = await fetch(buildPath('api/getinventory'),
+                response = await fetch(buildPath('api/searchinventory'),
                 {method:'POST',body:js2,headers:{'Content-Type':
                 'application/json'}});
             }
