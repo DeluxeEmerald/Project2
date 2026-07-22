@@ -117,7 +117,6 @@ function AddedCardToDeck() {
 
     async function awaitUpdate() {
         setMessage("Loading...");
-        console.log(deck);
         if (addrm) {
             const error = await addToDeck();
             await getDecks();

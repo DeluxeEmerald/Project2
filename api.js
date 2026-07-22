@@ -1015,10 +1015,11 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
     else
     {
       var existingCard = false;
-      deck.cards.forEach(async (element) => {
+      deck.cards.forEach((element) => {
         // console.log('e: '+element);
         // console.log('c: '+cardId);
-        existingCard = ((String(element) == String(cardId)) && (existingCard == false));
+        if (existingCard == false)
+          existingCard = (String(element) == String(cardId));
       });
  
       if( existingCard )
@@ -1028,6 +1029,7 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
         //   // { $inc: { "cards.$.quantity": quantity } }
         // );
         error = 'The card is already in this deck!';
+        console.log("NOTHING WRONG WITH API");
       }
       else
       {
@@ -1035,6 +1037,7 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
           { _id: new ObjectId(deckId) },
           { $push: { cards: new ObjectId(cardId) /*{ cardId: , quantity: quantity } */ } }
         );
+        console.log("SOMETHING WRONG WITH API");
       }
     }
   }

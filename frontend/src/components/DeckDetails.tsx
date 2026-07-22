@@ -128,8 +128,8 @@ function DeckDetails() {
                         </div>
                 </div>
                 <p className='text-black text-xl'>Add cards to deck</p>
-                <Inventory inventoryOnly onCardClick={(card) => navigate(`/modifycard/${deck.ID}`, 
-                    { state: { deck, card, addrm: true } })} />
+                <Inventory inventoryOnly onCardClick={(card) => navigate(`/modifycard/${deck.id}`, 
+                    { state: { deck:deck, card:card, addrm: true } })} />
             </div>
         </div>
     );

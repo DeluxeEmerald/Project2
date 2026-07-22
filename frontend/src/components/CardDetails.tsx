@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { retrieveToken, retrieveUserID, storeToken } from '../tokenStorage';
 import { buildPath } from './Path';
 import { useRef } from 'react';
+import deckImage from '../assets/deckImage.png';
 
 function CardDetails() {
     const location = useLocation();
@@ -14,17 +15,32 @@ function CardDetails() {
         navigate(`/modifycard/${deck._id}`, { state: { deck:deck, card:card, addrm:toAddOrRemove.current } });
     }
     
-    function createNewDeckDiv(deck:any, text:string, classNames:string) : HTMLDivElement {
+    function createNewDeckDiv(deck: any, text: string, classNames: string): HTMLDivElement {
         const div = document.createElement('div');
-        div.className = 'rounded-2xl m-4 border-5 bg-black flex items-center justify-center';
-        div.classList.add(classNames);
+        div.className = 'm-[25px] flex flex-col items-center w-32 h-80';
+
+        const imageDiv = document.createElement('div');
+        imageDiv.className = 'w-32 h-64 flex flex-col items-center justify-center bg-cover bg-center shrink-0';
+        if (deck) imageDiv.style.backgroundImage = `url(${deckImage})`;
+        // classNames may contain multiple space-separated classes;
+        // classList.add() can't take a single multi-class string, so split it
+        classNames.split(' ').filter(Boolean).forEach(cls => imageDiv.classList.add(cls));
 
         const button: HTMLButtonElement = document.createElement('button');
-        button.textContent = text;
-        button.className = 'flex-1 w-32 h-48 text-white bg-magic hover:bg-wood hover:text-black'
-        button.onclick = () => deck ? toModifyCard(deck) : {};
+        button.className = 'flex-1 w-32 h-64';
+        button.onclick = () => (deck ? toModifyCard(deck) : {});
+        imageDiv.appendChild(button);
 
-        div.appendChild(button);
+        const textDiv = document.createElement('div');
+        textDiv.textContent = text;
+        // Fixed-height slot: same space reserved regardless of line count,
+        // clamps to 2 lines and ellipsizes anything longer
+        textDiv.className =
+            'w-32 h-12 flex items-center justify-center text-center text-sm leading-tight ' +
+            'overflow-hidden line-clamp-2 shrink-0';
+
+        div.appendChild(imageDiv);
+        div.appendChild(textDiv);
 
         return div;
     }
