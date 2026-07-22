@@ -9,6 +9,9 @@ function RequestReset() {
 
     async function callReset(){
         const email = (document.getElementById("email") as HTMLInputElement)?.value || '';
+        if(emailVerify()){
+          return;
+        }
         var obj = {email: email};
         var js = JSON.stringify(obj);
 
@@ -16,21 +19,31 @@ function RequestReset() {
             {method:'POST',body:js,headers:{'Content-Type':
             'application/json'}});
                 
-            var res = JSON.parse(await response.text());
-            if( res.error && res.error.length > 0 )
-                {
-                    setMessage(res.error);
-                }
-                else
-                {
-                   setMessage("A link has been sent to your inbox, if you can't find it check your spam"); 
-                }
-            
-
+        var res = JSON.parse(await response.text());
+        if( res.error && res.error.length > 0 )
+            {
+              setMessage(res.error);
+            }
+        else
+        {
+          setMessage("A link has been sent to your inbox, if you can't find it check your spam"); 
+        }
     }
 
     function toLogin(){
       navigate('/');
+    }
+
+    function emailVerify(){
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const email = (document.getElementById("email") as HTMLInputElement).value || '';
+      
+      if (!emailRegex.test(email)){
+          setMessage("Please enter a valid email.");
+          return true;
+        }
+      else
+        return false;
     }
 
   return (
