@@ -1,8 +1,7 @@
-import React, {useState, useRef, useEffect} from 'react';
+import {useState, useRef, useEffect} from 'react';
 import { buildPath } from './Path';
 import { storeToken, retrieveToken, retrieveUserID } from '../tokenStorage';
 import { useNavigate } from 'react-router-dom';
-
 
 const Inventory = ({ onCardClick, inventoryOnly }: {
     onCardClick?: (card: any) => void;
@@ -10,10 +9,10 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
 }) => {
 
     let _ud : any = retrieveUserID();
-    let ud = JSON.parse( _ud );
+    let ud = JSON.parse(_ud);
     let userId : string = ud.id;
     const [searchResults,setResults] = useState('');
-    const [search,setSearchValue] = React.useState('');
+    const [search,setSearchValue] = useState('');
     const [message, setMessage] = useState('');
     const isTrueSortRef = useRef(false);
     const isFilterOptionsRef = useRef(false);
@@ -73,7 +72,7 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
         
         try
         {
-            const selectedInventory = document.getElementById("owned") as HTMLInputElement | null;
+            const selectedInventory = document.getElementById('owned') as HTMLInputElement | null;
             var isSearchingInv = true;
             if (!inventoryOnly && selectedInventory) isSearchingInv = selectedInventory.checked;
 
@@ -142,14 +141,13 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
     };
 
     function handleSearchTextChange( e: any ) : void{
-        setSearchValue( e.target.value );
+        setSearchValue(e.target.value);
     }
 
     function checkFilter(typeLine: string,rarity: string): boolean{
-        const typeId = ['creature', 'land', 'instant', 'sorcery', 'artifact', 'enchantment', 'planeswalker']
-        const rarityId = ['common', 'uncommon', 'rare', 'mythic']
+        const typeId = ['creature', 'land', 'instant', 'sorcery', 'artifact', 'enchantment', 'planeswalker'];
+        const rarityId = ['common', 'uncommon', 'rare', 'mythic'];
 
-        
         const selectedTypes = typeId.filter(id =>
             (document.getElementById(id) as HTMLInputElement)?.checked
         );
@@ -158,10 +156,10 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
         );
 
         const typeMatch = selectedTypes.length === 0 ||
-            selectedTypes.some(x => typeLine.toLowerCase().includes(x));
+            selectedTypes.some(x => (typeLine || '').toLowerCase().includes(x));
 
         const rarityMatch = selectedRarities.length === 0 ||
-            selectedRarities.includes(rarity.toLowerCase());
+            selectedRarities.includes((rarity || '').toLowerCase());
 
         return typeMatch && rarityMatch;
     }
@@ -226,8 +224,8 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
         }
 
         if ((document.getElementById('rarity') as HTMLInputElement)?.checked) {
-            return (a, b) => (rarityOrder[a.rarity.toLowerCase()] ?? 99) -
-                            (rarityOrder[b.rarity.toLowerCase()] ?? 99);
+            return (a, b) => (rarityOrder[(a.rarity || '').toLowerCase()] ?? 99) -
+                            (rarityOrder[(b.rarity || '').toLowerCase()] ?? 99);
         }
 
         if ((document.getElementById('color') as HTMLInputElement)?.checked) {
@@ -245,7 +243,6 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
         const container = document.getElementById('filterOption');
         if (!container) return;
 
-        
         if(!isFilterOptionsRef.current){
             if(!container.hasChildNodes()){
                 container.className ='flex justify-center items-center';
@@ -262,53 +259,20 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
                 </div>
                 <p class='inventory-popover-title'>Type</p>
                 <div class='inventory-option-grid'>
-                <div class="inventory-option">
-                    <input type="checkbox" id="creature" value="creature" class="w-4 h-4">
-                    <label for="creature" class="text-sm">Creature</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="land" value="land" class="w-4 h-4">
-                    <label for="land" class="text-sm">Land</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="instant" value="instant" class="w-4 h-4">
-                    <label for="instant" class="text-sm">Instant</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="sorcery" value="sorcery" class="w-4 h-4">
-                    <label for="sorcery" class="text-sm">Sorcery</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="artifact" value="aritfact" class="w-4 h-4">
-                    <label for="artifact" class="text-sm">Artifact</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="enchantment" value="enchantment" class="w-4 h-4">
-                    <label for="enchantment" class="text-sm">Enchantment</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="planeswalker" value="planeswalker" class="w-4 h-4">
-                    <label for="planeswalker" class="text-sm">Planeswalker</label>
-                </div>
+                <div class="inventory-option"><input type="checkbox" id="creature" value="creature" class="w-4 h-4"><label for="creature" class="text-sm">Creature</label></div>
+                <div class="inventory-option"><input type="checkbox" id="land" value="land" class="w-4 h-4"><label for="land" class="text-sm">Land</label></div>
+                <div class="inventory-option"><input type="checkbox" id="instant" value="instant" class="w-4 h-4"><label for="instant" class="text-sm">Instant</label></div>
+                <div class="inventory-option"><input type="checkbox" id="sorcery" value="sorcery" class="w-4 h-4"><label for="sorcery" class="text-sm">Sorcery</label></div>
+                <div class="inventory-option"><input type="checkbox" id="artifact" value="artifact" class="w-4 h-4"><label for="artifact" class="text-sm">Artifact</label></div>
+                <div class="inventory-option"><input type="checkbox" id="enchantment" value="enchantment" class="w-4 h-4"><label for="enchantment" class="text-sm">Enchantment</label></div>
+                <div class="inventory-option"><input type="checkbox" id="planeswalker" value="planeswalker" class="w-4 h-4"><label for="planeswalker" class="text-sm">Planeswalker</label></div>
                 </div>
                 <p class='inventory-popover-title'>Rarity</p>
                 <div class='inventory-option-grid'>
-                <div class="inventory-option">
-                    <input type="checkbox" id="common" value="common" class="w-4 h-4">
-                    <label for="common" class="text-sm">Common</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="uncommon" value="uncommon" class="w-4 h-4">
-                    <label for="uncommon" class="text-sm">Uncommon</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="rare" value="rare" class="w-4 h-4">
-                    <label for="rare" class="text-sm">Rare</label>
-                </div>
-                <div class="inventory-option">
-                    <input type="checkbox" id="mythic" value="mythic" class="w-4 h-4">
-                    <label for="mythic" class="text-sm">Mythic</label>
-                </div>
+                <div class="inventory-option"><input type="checkbox" id="common" value="common" class="w-4 h-4"><label for="common" class="text-sm">Common</label></div>
+                <div class="inventory-option"><input type="checkbox" id="uncommon" value="uncommon" class="w-4 h-4"><label for="uncommon" class="text-sm">Uncommon</label></div>
+                <div class="inventory-option"><input type="checkbox" id="rare" value="rare" class="w-4 h-4"><label for="rare" class="text-sm">Rare</label></div>
+                <div class="inventory-option"><input type="checkbox" id="mythic" value="mythic" class="w-4 h-4"><label for="mythic" class="text-sm">Mythic</label></div>
                 </div>
                 </div>
                 `;
@@ -325,29 +289,23 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
     }
 
     function toCardDetails(card: any) {
-    if (onCardClick) {
-      onCardClick(card);
-    } else {
-      navigate(`/card/${card.id}`, { state: { card } });
+        if (onCardClick) {
+            onCardClick(card);
+        } else {
+            navigate(`/card/${card.id}`, { state: { card } });
+        }
     }
-  }
 
     useEffect(() => {
         if (hasLoaded.current) return;
         hasLoaded.current = true;
-
-        const run = async () => {
-            await searchCard(null);
-        };
-
-        run();
+        searchCard(null);
     }, []);
     
     return(
     <div id="cardUIDiv" className='inventory-shell flex items-center justify-center flex-col text-black gap-6'>
         <div className='inventory-header w-full'>
             <div>
-<<<<<<< HEAD
                 <p className='brand-mark'>Inventory</p>
                 <h2 className='inventory-title'>Browse your collection</h2>
             </div>
@@ -358,29 +316,11 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
             <div className='inventory-search'>
                 <label className='inventory-field'>
                     <span className='field-label'>Search cards</span>
-                    <input type="text" id="searchText" placeholder="Search by card name, type, set, or artist" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCard(e);}} 
+                    <input type="text" id="searchText" placeholder="Search by card name, type, set, or artist" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === 'Enter') searchCard(e);}}
                     className='text-input' />
                 </label>
                 <button type="button" id="searchCardButton" className="primary-button"
                     onClick={searchCard}>Search</button>
-=======
-            Search: <input type="text" id="searchText" placeholder="Card To Search For" onChange={handleSearchTextChange} onKeyDown={e => {if (e.key === "Enter") searchCard(e);}} 
-            className='bg-white' />
-            <button type="button" id="searchCardButton" 
-            className="bg-main text-white hover:text-black hover:bg-wood rounded-full 
-            w-32 ml-4 border-2 border-black"
-                onClick={searchCard}> Search Card</button>
-        </div>
-
-        <div className='flex flex-col items-center gap-2'>
-            <div>
-                <button type="button" id="Sort" className="bg-main text-white hover:text-black 
-                hover:bg-wood w-32 border-2 border-black"
-                    onClick={showSort}> Sort</button>   
-                <button type="button" id="Filter" className="bg-main text-white hover:text-black 
-                hover:bg-wood w-32 border-2 border-black"
-                    onClick={showFilterOptions}> Filter</button>
->>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
             </div>
 
             <div className='inventory-actions'>
@@ -402,5 +342,5 @@ const Inventory = ({ onCardClick, inventoryOnly }: {
         <p id="cardList" className='inventory-grid w-full'></p>
     </div>
     );
-}
+};
 export default Inventory;

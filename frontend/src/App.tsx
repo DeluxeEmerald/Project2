@@ -13,7 +13,6 @@ import Inventory from './components/Inventory';
 import Decks from './components/Decks';
 import CardDetails from './components/CardDetails';
 import SignUpSubmission from './components/SignUpSubmission';
-import VerifyEmail from './components/VerifyEmail';
 import RequestReset from './components/ResetRequest';
 import ResetPassword from './components/ResetPassword';
 
@@ -29,11 +28,8 @@ return (
       <Route path="/" element={<LoginPage />} />
       <Route path="/confirm" element={<SignUpSubmission />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
-<<<<<<< HEAD
-=======
       <Route path="/requestreset" element={<RequestReset />} />
       <Route path="/reset-password" element={<ResetPassword />} />
->>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
       <Route path="/signup" element={<SignupPage />} />
 
       <Route element={<LoggedInTopBar />}>

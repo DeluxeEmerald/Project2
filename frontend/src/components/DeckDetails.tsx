@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {useEffect, useMemo, useState} from 'react';
 import { buildPath} from './Path';
 import { retrieveToken, retrieveUserID, storeToken } from '../tokenStorage';
@@ -44,20 +43,10 @@ function normalizeCard(card: any): CardData {
         imageUrl: card.imageUrl ?? '',
     };
 }
-=======
-import {useEffect, useRef} from 'react';
-import { buildPath} from './Path';
-import { retrieveToken, storeToken, retrieveUserID } from '../tokenStorage';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Inventory from './Inventory';
-import RemoveDeck from './DeleteDeck';
->>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
-
 
 function DeckDetails() {
     const location = useLocation();
     const navigate = useNavigate();
-<<<<<<< HEAD
     const deck = location.state?.deck as DeckData | undefined;
     const deckId = normalizeObjectId(deck?.id ?? deck?._id);
     const deckTitle = deck?.deckName ?? deck?.name ?? 'Deck';
@@ -128,24 +117,16 @@ function DeckDetails() {
 
         return typeMatch && rarityMatch;
     }
-=======
-    const deck = location.state?.deck;
-    const cardIDs = deck.cards;
-
-    const hasLoaded = useRef(false);
-
->>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
 
     if (!deck) {
         return (
-            <div className='flex flex-col items-center gap-4 text-black p-8 font-grover' id="cardUIDiv">
+            <div className='flex flex-col items-center gap-4 text-black p-8 font-grover' id='cardUIDiv'>
                 <p>No deck data available. Please go back and select a deck.</p>
                 <button onClick={() => navigate('/decks')} className='bg-main w-32'>Go Back</button>
             </div>
         );
     }
 
-<<<<<<< HEAD
     const sortedFilteredSearchResults = useMemo(() => {
         return [...searchResults]
             .filter((card) => passesFilter(card))
@@ -161,12 +142,6 @@ function DeckDetails() {
         if (!cardIsInInventory(card)) {
             setMessage('You can only add cards that are in your inventory.');
             return;
-=======
-    const handleDelete = (card: any) => {
-        const confirmed = window.confirm('Are you sure you want to remove this card from the deck?');
-        if (confirmed) {
-            toCardRemoval(card);
->>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
         }
 
         setMessage('');
@@ -190,7 +165,7 @@ function DeckDetails() {
             let txt = await response.text();
             let res = JSON.parse(txt);
             if(res.error && res.error.length > 0){
-                console.log(res.error);
+                setMessage(res.error);
             }
             else{
                 storeToken(res.jwtToken);
@@ -202,7 +177,6 @@ function DeckDetails() {
         }
         catch(error:any)
         {
-<<<<<<< HEAD
             setMessage(error.toString());
         }
         finally {
@@ -212,23 +186,6 @@ function DeckDetails() {
 
     function toggleType(option: string) {
         setSelectedTypes((previous) => ({ ...previous, [option]: !previous[option] }));
-=======
-            console.log(error.toString());
-        }
-    };
-
-    useEffect(() => {
-    if (hasLoaded.current || !cardIDs) return;
-    hasLoaded.current = true;
-
-    async function loadDeckCards() {
-        const container = document.getElementById('deckCardsList');
-        if (container) container.innerHTML = 'Loading...';
-        if (container) container.innerHTML = '';
-        cardIDs.forEach((element: string) => {
-            searchCard(element);
-        });
->>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
     }
 
     function toggleRarity(option: string) {
@@ -334,8 +291,7 @@ function DeckDetails() {
     }, [deck.cards]);
 
     return (
-<<<<<<< HEAD
-        <div className='deck-detail-shell text-black' id="cardUIDiv">
+        <div className='deck-detail-shell text-black' id='cardUIDiv'>
             <div className='deck-detail-header'>
                 <div>
                     <p className='brand-mark'>Deck Details</p>
@@ -343,28 +299,6 @@ function DeckDetails() {
                     <p className='deck-detail-copy'>Manage cards already in this deck and search for new cards to add.</p>
                 </div>
                 <button className='secondary-button' onClick={() => navigate('/decks')}>Back to Decks</button>
-=======
-        <div className='flex flex-col justify-center text-black'>
-            <div className='rounded-3xl w-full flex flex-col items-center justify-center gap-8 
-            p-6' id="cardUIDiv">
-                <div className='flex flex-row gap-8 justify-center'>   
-                    <button className="mt-5 w-48 h-8 rounded-full text-white bg-main 
-                    hover:bg-wood hover:text-black font-grover border-2 border-black" 
-                    onClick={() => navigate("/decks")}>Go Back</button>
-                    <RemoveDeck deckId={deck.deckID} />
-                </div>
-                <div className='flex flex-col items-center justify-center'>
-                        <div className='flex flex-col gap-2'>
-                            <p className='text-4xl'>Deck Name: {deck.deckName}</p>
-                            <div>Click on a card to remove it!</div>
-                            <div id='deckCardsList' className='flex flex-wrap gap-2 
-                            justify-center mb-4'></div>
-                        </div>
-                </div>
-                <p className='text-black text-xl'>Add cards to deck</p>
-                <Inventory inventoryOnly onCardClick={(card) => navigate(`/modifycard/${deck.id}`, 
-                    { state: { deck:deck, card:card, addrm: true } })} />
->>>>>>> 04be01e36cc669315e7b28f2bb791b68b4845e9c
             </div>
 
             <div className='deck-detail-grid'>
