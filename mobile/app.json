@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "MTG Collection",
+    "slug": "mtg-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.mtgcollection",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Use Face ID to quickly and securely unlock your saved session."
+      }
+    },
+    "android": {
+      "package": "com.yourcompany.mtgcollection",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#131022"
+      }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow MTG Collection to access your photos so you can set a profile picture."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#131022"
+        }
+      ]
+    ]
+  }
+}

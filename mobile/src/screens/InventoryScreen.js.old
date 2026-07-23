@@ -1,0 +1,117 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
+import { getInventory } from '../api';
+import { useAuth } from '../context/AuthContext';
+
+export default function InventoryScreen({ navigation }) {
+  const { token, userId, name, signOut } = useAuth();
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
+
+  const load = useCallback(async () => {
+    setError('');
+    try {
+      const result = await getInventory(token, userId);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setCards(result.results || []);
+      }
+    } catch (e) {
+      setError(e.message);
+    }
+  }, [token, userId]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity onPress={signOut} style={{ marginRight: 12 }}>
+          <Text style={{ color: '#5b2a86', fontWeight: '600' }}>Log Out</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, signOut]);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await load();
+      setLoading(false);
+    })();
+  }, [load]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.greeting}>Welcome{name ? `, ${name}` : ''}</Text>
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      <FlatList
+        data={cards}
+        keyExtractor={(item) => String(item.inventoryId)}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListEmptyComponent={
+          !error ? <Text style={styles.empty}>No cards in your inventory yet.</Text> : null
+        }
+        renderItem={({ item }) => (
+          <View style={styles.row}>
+            {item.imageUrl ? (
+              <Image source={{ uri: item.imageUrl }} style={styles.thumb} resizeMode="contain" />
+            ) : (
+              <View style={[styles.thumb, styles.thumbPlaceholder]} />
+            )}
+            <View style={styles.rowText}>
+              <Text style={styles.cardName}>{item.CardName || item.name}</Text>
+              <Text style={styles.cardTotal}>Owned: {item.total}</Text>
+            </View>
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#fff', padding: 16 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  greeting: { fontSize: 18, fontWeight: '600', marginBottom: 12 },
+  error: { color: '#b00020', marginBottom: 12 },
+  empty: { textAlign: 'center', marginTop: 40, color: '#666' },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    alignItems: 'center',
+  },
+  thumb: { width: 50, height: 70, marginRight: 12, borderRadius: 4, backgroundColor: '#f2f2f2' },
+  thumbPlaceholder: { backgroundColor: '#e0e0e0' },
+  rowText: { flex: 1 },
+  cardName: { fontSize: 16, fontWeight: '600' },
+  cardTotal: { fontSize: 14, color: '#555', marginTop: 2 },
+});

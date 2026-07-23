@@ -1,0 +1,35 @@
+{
+  "name": "mtg-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android"
+  },
+  "dependencies": {
+    "expo": "^54.0.0",
+    "expo-status-bar": "*",
+    "expo-image-picker": "*",
+    "expo-haptics": "*",
+    "expo-splash-screen": "*",
+    "expo-local-authentication": "*",
+    "expo-constants": "*",
+    "expo-secure-store": "*",
+    "expo-linear-gradient": "*",
+    "@expo/vector-icons": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-screens": "*",
+    "@react-navigation/native": "^6.1.17",
+    "@react-navigation/native-stack": "^6.9.26",
+    "@react-navigation/bottom-tabs": "^6.5.20",
+    "@react-native-async-storage/async-storage": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "babel-preset-expo": "*"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "MTG Collection",
+    "slug": "mtg-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.mtgcollection",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.yourcompany.mtgcollection"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow MTG Collection to access your photos so you can set a profile picture."
+        }
+      ]
+    ]
+  }
+}
