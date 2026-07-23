@@ -998,7 +998,7 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
     {
       const db = client.db('MTG');
     
-      const deck = await db.collection('Decks').findOne({ _id: new ObjectId(normalizedDeckId) });
+      const deck = await db.collection('Decks').findOne({ _id: new ObjectId(deckId) });
     
       if( !deck )
       {
@@ -1006,9 +1006,9 @@ app.post('/api/addcardtodeck', async (req, res, next) =>
       }
       else
       {
-        const ownerUserIdString = normalizeObjectId(deck.userId);
-        const ownerUserId = ObjectId.isValid(ownerUserIdString) ? new ObjectId(ownerUserIdString) : null;
+        const ownerUserId = ObjectId.isValid(deck.userId) ? new ObjectId(deck.userId) : null;
 
+        
         if( !ownerUserId )
         {
           error = 'Deck owner is invalid';
