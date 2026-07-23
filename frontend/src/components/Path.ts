@@ -12,5 +12,5 @@ export function buildPath(route: string): string
     return `http://${host}:5000/${route}`;
   }
 
-  return `${window.location.origin}/${route}`;
+  return `${window.location.origin}:5000/${route}`;
 }
